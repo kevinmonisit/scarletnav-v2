@@ -1,10 +1,13 @@
 import Image from 'next/image';
-import Example from '@/app/components/Example';
+import App from '@/app/components/App';
+import { Suspense } from 'react';
 
 export default function Home() {
   return (
-    <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-      <Example />
+    <main
+      suppressHydrationWarning={true}
+      className='flex min-h-screen flex-col items-center justify-between p-24'>
+      <App />
     </main>
   );
 }
