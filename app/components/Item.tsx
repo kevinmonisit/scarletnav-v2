@@ -9,11 +9,14 @@ interface Props {
 }
 export type Ref = HTMLDivElement;
 
-export const Item = forwardRef<Ref, Props>(function Item({ id, ...props }, ref) {
+export const Item = forwardRef<Ref, Props>(function Item({
+  id,
+  isOverlay = false,
+  ...props }, ref) {
   const activeId = useBearStore((state) => state.activeId);
 
   useEffect(() => {
-    console.log('Item', activeId);
+    console.log('Item', activeId, id);
   }, [activeId]);
 
   return (
@@ -23,8 +26,8 @@ export const Item = forwardRef<Ref, Props>(function Item({ id, ...props }, ref) 
         clsx(
           'bg-gray-50 w-40 h-80',
           {
-            'invisible': activeId !== null && activeId === id,
-          }
+            'invisible': activeId !== null && activeId === id && !isOverlay,
+          },
         )
       }
     >

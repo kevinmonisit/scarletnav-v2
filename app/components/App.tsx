@@ -12,6 +12,7 @@ import {
   DragOverlay,
   DragStartEvent,
   UniqueIdentifier,
+  DragCancelEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -27,7 +28,7 @@ import { devtools, persist } from 'zustand/middleware';
 
 interface BearState {
   activeId: UniqueIdentifier | null;
-  setID: (id: UniqueIdentifier) => void;
+  setID: (id: UniqueIdentifier | null) => void;
 }
 
 export const useBearStore = create<BearState>()(
@@ -44,6 +45,8 @@ export const useBearStore = create<BearState>()(
 
 export default function App() {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const setStoreID = useBearStore((state) => state.setID);
+  const getActiveID = useBearStore((state) => state.activeId);
   const [items, setItems] = useState(['A', 'B', 'C']);
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -58,6 +61,7 @@ export default function App() {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
+      onDragCancel={handleDragCancel}
     >
       <SortableContext
         items={items}
@@ -68,19 +72,32 @@ export default function App() {
         </Grid>
       </SortableContext>
       <DragOverlay>
-        {activeId ? <Item id={activeId} /> : null}
+        {activeId ? <Item id={activeId} isOverlay /> : null}
       </DragOverlay>
     </DndContext>
   );
 
   function handleDragStart(event: DragStartEvent) {
+    console.log('handle drag start');
     const { active } = event;
-    useBearStore.setState({ activeId: active.id });
-
+    setStoreID(active.id);
     setActiveId(active.id);
   }
 
+  function handleDragCancel(event: DragCancelEvent) {
+    console.log("cancelled");
+    setStoreID(null);
+    setActiveId(null);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    console.log('drag end');
+    setStoreID(null);
+    setActiveId(null);
+
+    console.log('ended!');
+
+    console.log(getActiveID);
     const { active, over } = event;
 
     if (!over || !active) {
@@ -99,8 +116,7 @@ export default function App() {
         return arrayMove(items, oldIndex, newIndex);
       });
 
-      setActiveId(null);
-      useBearStore.setState({ activeId: null });
+      // useBearStore.setState({ activeId: null });
     }
   }
 }
