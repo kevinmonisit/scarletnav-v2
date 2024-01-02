@@ -1,4 +1,4 @@
-import App from '@/app/features/middlePanel/dashboard/components/App';
+import App from '@/app/features/middlePanel/dashboard/App';
 import React from 'react';
 
 const DashboardPage: React.FC = () => {

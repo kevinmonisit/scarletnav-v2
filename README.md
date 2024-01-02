@@ -3,6 +3,9 @@
   <span>The Ultimate Course Planner</span>
 </center>
 
+## Attention
+Currently in active development. Nothing works yet.
+
 ## Getting Started
 
 First, run the development server:
