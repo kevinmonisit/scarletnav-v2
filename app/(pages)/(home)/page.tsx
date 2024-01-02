@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import App from '@/app/components/App';
+import App from '@/app/features/middlePanel/dashboard/components/App';
 import { Suspense } from 'react';
 
 export default function Home() {
