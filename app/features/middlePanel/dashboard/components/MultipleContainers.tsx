@@ -16,6 +16,7 @@ import {
   useSensor,
   MeasuringStrategy,
   KeyboardCoordinateGetter,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -31,7 +32,7 @@ import { Item, Container, ContainerProps } from "./ui/index";
 import SortableItem from "./SortableItem";
 import { createRange, getColor, dropAnimation, animateLayoutChanges, getIndex, findContainer } from "../helpers/utilities";
 import { Items } from "../types";
-import { collisionDetectionStrategy as detectionStrategy, handleDragOver } from "../helpers/logic";
+import { collisionDetectionStrategy as detectionStrategy, handleAddColumn, handleDragEnd, handleDragOver, handleRemove } from "../helpers/logic";
 
 function DroppableContainer({
   children,
@@ -221,77 +222,17 @@ export function MultipleContainers({
         )
       }}
 
-      onDragEnd={({ active, over }) => {
-        if (active.id in items && over?.id) {
-          setContainers((containers) => {
-            const activeIndex = containers.indexOf(active.id);
-            const overIndex = containers.indexOf(over.id);
-
-            return arrayMove(containers, activeIndex, overIndex);
-          });
-        }
-
-        const activeContainer = findContainer(items, active.id);
-
-        if (!activeContainer) {
-          setActiveId(null);
-          return;
-        }
-
-        const overId = over?.id;
-
-        if (overId == null) {
-          setActiveId(null);
-          return;
-        }
-
-        if (overId === TRASH_ID) {
-          setItems((items) => ({
-            ...items,
-            [activeContainer]: items[activeContainer].filter(
-              (id) => id !== activeId
-            ),
-          }));
-          setActiveId(null);
-          return;
-        }
-
-        if (overId === PLACEHOLDER_ID) {
-          const newContainerId = getNextContainerId();
-
-          unstable_batchedUpdates(() => {
-            setContainers((containers) => [...containers, newContainerId]);
-            setItems((items) => ({
-              ...items,
-              [activeContainer]: items[activeContainer].filter(
-                (id) => id !== activeId
-              ),
-              [newContainerId]: [active.id],
-            }));
-            setActiveId(null);
-          });
-          return;
-        }
-
-        const overContainer = findContainer(items, overId);
-
-        if (overContainer) {
-          const activeIndex = items[activeContainer].indexOf(active.id);
-          const overIndex = items[overContainer].indexOf(overId);
-
-          if (activeIndex !== overIndex) {
-            setItems((items) => ({
-              ...items,
-              [overContainer]: arrayMove(
-                items[overContainer],
-                activeIndex,
-                overIndex
-              ),
-            }));
-          }
-        }
-
-        setActiveId(null);
+      onDragEnd={(event: DragEndEvent) => {
+        handleDragEnd(
+          event,
+          items,
+          TRASH_ID,
+          activeId,
+          PLACEHOLDER_ID,
+          setContainers,
+          setActiveId,
+          setItems,
+        )
       }}
       cancelDrop={cancelDrop}
       onDragCancel={onDragCancel}
@@ -327,7 +268,7 @@ export function MultipleContainers({
                 scrollable={scrollable}
                 style={containerStyle}
                 unstyled={minimal}
-                onRemove={() => handleRemove(containerId)}
+                onRemove={() => handleRemove(containerId, setContainers)}
               >
                 <SortableContext items={items[containerId]} strategy={strategy}>
                   {items[containerId].map((value, index) => {
@@ -356,7 +297,9 @@ export function MultipleContainers({
                 id={PLACEHOLDER_ID}
                 disabled={isSortingContainer}
                 items={empty}
-                onClick={handleAddColumn}
+                onClick={() => {
+                  handleAddColumn(setContainers, setItems, items);
+                }}
                 placeholder
               >
                 + Add column
@@ -432,30 +375,5 @@ export function MultipleContainers({
         ))}
       </Container>
     );
-  }
-
-  function handleRemove(containerID: UniqueIdentifier) {
-    setContainers((containers) =>
-      containers.filter((id) => id !== containerID)
-    );
-  }
-
-  function handleAddColumn() {
-    const newContainerId = getNextContainerId();
-
-    unstable_batchedUpdates(() => {
-      setContainers((containers) => [...containers, newContainerId]);
-      setItems((items) => ({
-        ...items,
-        [newContainerId]: [],
-      }));
-    });
-  }
-
-  function getNextContainerId() {
-    const containerIds = Object.keys(items);
-    const lastContainerId = containerIds[containerIds.length - 1];
-
-    return String.fromCharCode(lastContainerId.charCodeAt(0) + 1);
   }
 }

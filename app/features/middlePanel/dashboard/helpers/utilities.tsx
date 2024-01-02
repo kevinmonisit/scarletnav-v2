@@ -65,3 +65,12 @@ export const getIndex = (
 
   return index;
 }
+
+export const getNextContainerId = (
+  items: Items
+) => {
+  const containerIds = Object.keys(items);
+  const lastContainerId = containerIds[containerIds.length - 1];
+
+  return String.fromCharCode(lastContainerId.charCodeAt(0) + 1);
+}

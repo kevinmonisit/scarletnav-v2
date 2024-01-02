@@ -1,6 +1,8 @@
 import { closestCenter, pointerWithin, rectIntersection, getFirstCollision, Active, DroppableContainer, CollisionDetection, UniqueIdentifier, DragOverEvent } from "@dnd-kit/core";
 import { Items } from "../types";
-import { findContainer } from "./utilities";
+import { findContainer, getNextContainerId } from "./utilities";
+import { unstable_batchedUpdates } from "react-dom";
+import { arrayMove } from "@dnd-kit/sortable";
 
 
 /**
@@ -142,4 +144,116 @@ export const handleDragOver = (
     });
   }
 }
+
+export const handleDragEnd = (
+  event: DragOverEvent,
+  items: Items,
+  TRASH_ID: string,
+  activeId: UniqueIdentifier | null,
+  PLACEHOLDER_ID: string,
+  setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
+  setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
+  setItems: React.Dispatch<React.SetStateAction<Items>>,
+) => {
+  const { active, over } = event;
+
+  if (active.id in items && over?.id) {
+    setContainers((containers) => {
+      const activeIndex = containers.indexOf(active.id);
+      const overIndex = containers.indexOf(over.id);
+
+      return arrayMove(containers, activeIndex, overIndex);
+    });
+  }
+
+  const activeContainer = findContainer(items, active.id);
+
+  if (!activeContainer) {
+    setActiveId(null);
+    return;
+  }
+
+  const overId = over?.id;
+
+  if (overId == null) {
+    setActiveId(null);
+    return;
+  }
+
+  if (overId === TRASH_ID) {
+    setItems((items) => ({
+      ...items,
+      [activeContainer]: items[activeContainer].filter(
+        (id) => id !== activeId
+      ),
+    }));
+    setActiveId(null);
+    return;
+  }
+
+  if (overId === PLACEHOLDER_ID) {
+    const newContainerId = getNextContainerId(
+      items
+    );
+
+    unstable_batchedUpdates(() => {
+      setContainers((containers) => [...containers, newContainerId]);
+      setItems((items) => ({
+        ...items,
+        [activeContainer]: items[activeContainer].filter(
+          (id) => id !== activeId
+        ),
+        [newContainerId]: [active.id],
+      }));
+      setActiveId(null);
+    });
+    return;
+  }
+
+  const overContainer = findContainer(items, overId);
+
+  if (overContainer) {
+    const activeIndex = items[activeContainer].indexOf(active.id);
+    const overIndex = items[overContainer].indexOf(overId);
+
+    if (activeIndex !== overIndex) {
+      setItems((items) => ({
+        ...items,
+        [overContainer]: arrayMove(
+          items[overContainer],
+          activeIndex,
+          overIndex
+        ),
+      }));
+    }
+  }
+
+  setActiveId(null);
+}
+
+export const handleAddColumn = (
+  setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
+  setItems: React.Dispatch<React.SetStateAction<Items>>,
+  items: Items,
+) => {
+  const newContainerId = getNextContainerId(items);
+
+  unstable_batchedUpdates(() => {
+    setContainers((containers) => [...containers, newContainerId]);
+    setItems((items) => ({
+      ...items,
+      [newContainerId]: [],
+    }));
+  });
+}
+
+export const handleRemove = (
+  containerID: UniqueIdentifier,
+  setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
+) => {
+  setContainers((containers) =>
+    containers.filter((id) => id !== containerID)
+  );
+}
+
 
