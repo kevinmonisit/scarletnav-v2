@@ -1,4 +1,6 @@
-import { UniqueIdentifier } from "@dnd-kit/core";
+import { DropAnimation, UniqueIdentifier, defaultDropAnimationSideEffects } from "@dnd-kit/core";
+import { AnimateLayoutChanges, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
+import { Items } from "../types";
 
 const defaultInitializer = (index: number) => index;
 
@@ -22,4 +24,44 @@ export function getColor(id: UniqueIdentifier) {
   }
 
   return undefined;
+}
+
+export const dropAnimation: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.5",
+      },
+    },
+  }),
+};
+
+export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
+  defaultAnimateLayoutChanges({ ...args, wasDragging: true });
+
+
+export const findContainer = (
+  items: Items,
+  id: UniqueIdentifier
+) => {
+  if (id in items) {
+    return id;
+  }
+
+  return Object.keys(items).find((key) => items[key].includes(id));
+};
+
+export const getIndex = (
+  items: Items,
+  id: UniqueIdentifier
+) => {
+  const container = findContainer(items, id);
+
+  if (!container) {
+    return -1;
+  }
+
+  const index = items[container].indexOf(id);
+
+  return index;
 }
