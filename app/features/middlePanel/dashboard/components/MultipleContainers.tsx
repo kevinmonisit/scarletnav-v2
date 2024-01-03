@@ -21,18 +21,19 @@ import {
 import {
   SortableContext,
   useSortable,
-  arrayMove,
   verticalListSortingStrategy,
   SortingStrategy,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./multipleContainersKeyboardCoordinates";
-import { Item, Container, ContainerProps } from "./ui/index";
+import { Container, ContainerProps } from "./ui/index";
 import SortableItem from "./SortableItem";
 import { createRange, getColor, dropAnimation, animateLayoutChanges, getIndex, findContainer } from "../helpers/utilities";
 import { Items } from "../types";
 import { collisionDetectionStrategy as detectionStrategy, handleAddColumn, handleDragEnd, handleDragOver, handleRemove } from "../helpers/logic";
+import useOverlayComponents from "../helpers/useOverlayComponents";
+import useDragHandlers from "../helpers/useDraghandlers";
 
 function DroppableContainer({
   children,
@@ -160,6 +161,32 @@ export function MultipleContainers({
   const lastOverId = useRef<UniqueIdentifier | null>(null);
   const recentlyMovedToNewContainer = useRef(false);
   const isSortingContainer = activeId ? containers.includes(activeId) : false;
+
+  const { renderSortableItemDragOverlay, renderContainerDragOverlay } = useOverlayComponents(
+    items,
+    columns,
+    handle,
+    renderItem,
+    getColor,
+    getItemStyles,
+    wrapperStyle,
+  );
+
+  const {
+    handleDragOver,
+    handleDragEnd,
+    handleRemove,
+    handleAddColumn,
+  } = useDragHandlers(
+    items,
+    TRASH_ID,
+    activeId,
+    PLACEHOLDER_ID,
+    recentlyMovedToNewContainer,
+    setContainers,
+    setActiveId,
+    setItems,
+  );
 
   const collisionDetectionStrategy: CollisionDetection = useCallback(
     (args) => detectionStrategy(
@@ -320,60 +347,4 @@ export function MultipleContainers({
       )}
     </DndContext>
   );
-
-  function renderSortableItemDragOverlay(id: UniqueIdentifier) {
-    return (
-      <Item
-        value={id}
-        handle={handle}
-        style={getItemStyles({
-          containerId: findContainer(items, id) as UniqueIdentifier,
-          overIndex: -1,
-          index: getIndex(items, id),
-          value: id,
-          isSorting: true,
-          isDragging: true,
-          isDragOverlay: true,
-        })}
-        color={getColor(id)}
-        wrapperStyle={wrapperStyle({ index: 0 })}
-        renderItem={renderItem}
-        dragOverlay
-      />
-    );
-  }
-
-  function renderContainerDragOverlay(containerId: UniqueIdentifier) {
-    return (
-      <Container
-        label={`Column ${containerId}`}
-        columns={columns}
-        style={{
-          height: "100%",
-        }}
-        shadow
-        unstyled={false}
-      >
-        {items[containerId].map((item, index) => (
-          <Item
-            key={item}
-            value={item}
-            handle={handle}
-            style={getItemStyles({
-              containerId,
-              overIndex: -1,
-              index: getIndex(items, item),
-              value: item,
-              isDragging: false,
-              isSorting: false,
-              isDragOverlay: false,
-            })}
-            color={getColor(item)}
-            wrapperStyle={wrapperStyle({ index })}
-            renderItem={renderItem}
-          />
-        ))}
-      </Container>
-    );
-  }
 }
