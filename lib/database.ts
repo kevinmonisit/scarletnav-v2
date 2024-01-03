@@ -1,3 +1,5 @@
+'use client';
+
 import { Course, Semester, Schedule, ScheduleState, CourseID } from "@/types/models";
 
 function createCourseArray() {

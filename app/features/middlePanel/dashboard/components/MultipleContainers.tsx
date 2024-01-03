@@ -25,7 +25,7 @@ import {
 } from "@dnd-kit/sortable";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./multipleContainersKeyboardCoordinates";
 import SortableItem from "./SortableItem";
-import { createRange, getColor, dropAnimation, getIndex } from "../helpers/utilities";
+import { getColor, dropAnimation, getIndex } from "../helpers/utilities";
 import { Items, dashboardOverviewState } from "../types";
 import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logic";
 import useOverlayComponents from "../helpers/useOverlayComponents";
