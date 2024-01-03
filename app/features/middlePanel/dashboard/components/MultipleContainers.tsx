@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal, unstable_batchedUpdates } from "react-dom";
+import { createPortal } from "react-dom";
 import {
   CancelDrop,
   CollisionDetection,
@@ -16,83 +16,23 @@ import {
   useSensor,
   MeasuringStrategy,
   KeyboardCoordinateGetter,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  useSortable,
   verticalListSortingStrategy,
   SortingStrategy,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./multipleContainersKeyboardCoordinates";
-import { Container, ContainerProps } from "./ui/index";
 import SortableItem from "./SortableItem";
-import { createRange, getColor, dropAnimation, animateLayoutChanges, getIndex, findContainer } from "../helpers/utilities";
-import { Items } from "../types";
+import { createRange, getColor, dropAnimation, getIndex } from "../helpers/utilities";
+import { Items, dashboardOverviewState } from "../types";
 import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logic";
 import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDragHandlers";
-
-function DroppableContainer({
-  children,
-  columns = 1,
-  disabled,
-  id,
-  items,
-  style,
-  ...props
-}: ContainerProps & {
-  disabled?: boolean;
-  id: UniqueIdentifier;
-  items: UniqueIdentifier[];
-  style?: React.CSSProperties;
-}) {
-  const {
-    active,
-    attributes,
-    isDragging,
-    listeners,
-    over,
-    setNodeRef,
-    transition,
-    transform,
-  } = useSortable({
-    id,
-    data: {
-      type: "container",
-      children: items,
-    },
-    animateLayoutChanges,
-  });
-  const isOverContainer = over
-    ? (id === over.id && active?.data.current?.type !== "container") ||
-    items.includes(over.id)
-    : false;
-
-  return (
-    <Container
-      ref={disabled ? undefined : setNodeRef}
-      style={{
-        ...style,
-        transition,
-        transform: CSS.Translate.toString(transform),
-        opacity: isDragging ? 0.5 : undefined,
-      }}
-      hover={isOverContainer}
-      handleProps={{
-        ...attributes,
-        ...listeners,
-      }}
-      columns={columns}
-      {...props}
-    >
-      {children}
-    </Container>
-  );
-}
-
+import DroppableContainer from "./DroppableContainer";
+import { getSchedule } from "@/lib/database";
+import { CourseID } from "@/types/models";
 
 interface Props {
   adjustScale?: boolean;
@@ -145,22 +85,28 @@ export function MultipleContainers({
   vertical = false,
   scrollable,
 }: Props) {
-  const [items, setItems] = useState<Items>(
-    () =>
-      initialItems ?? {
-        A: createRange(itemCount, (index) => `A${index + 1}`),
-        B: createRange(itemCount, (index) => `B${index + 1}`),
-        C: createRange(itemCount, (index) => `C${index + 1}`),
-        D: createRange(itemCount, (index) => `D${index + 1}`),
-      }
+  const [items, setItems] = useState<dashboardOverviewState>(
+    () => {
+      const { semesters } = getSchedule();
+      console.log('hello');
+
+      const data: dashboardOverviewState = {};
+      Array.from(semesters).forEach(([key, value]) => {
+        data[key] = value.courses.map(course => course);
+      });
+
+      return data;
+    }
   );
-  const [containers, setContainers] = useState(
+
+  const [schedule, setSchedule] = useState(
     Object.keys(items) as UniqueIdentifier[]
   );
+
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const lastOverId = useRef<UniqueIdentifier | null>(null);
   const recentlyMovedToNewContainer = useRef(false);
-  const isSortingContainer = activeId ? containers.includes(activeId) : false;
+  const isSortingContainer = activeId ? schedule.includes(activeId) : false;
   const [clonedItems, setClonedItems] = useState<Items | null>(null);
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -170,7 +116,10 @@ export function MultipleContainers({
     })
   );
 
-  const { renderSortableItemDragOverlay, renderContainerDragOverlay } = useOverlayComponents(
+  const {
+    renderSortableItemDragOverlay,
+    renderContainerDragOverlay
+  } = useOverlayComponents(
     items,
     columns,
     handle,
@@ -194,7 +143,7 @@ export function MultipleContainers({
     recentlyMovedToNewContainer,
     clonedItems,
     setClonedItems,
-    setContainers,
+    setSchedule,
     setActiveId,
     setItems,
   );
@@ -245,7 +194,7 @@ export function MultipleContainers({
         }}
       >
         <SortableContext
-          items={[...containers, PLACEHOLDER_ID]}
+          items={[...schedule, PLACEHOLDER_ID]}
           strategy={rectSortingStrategy}
         >
           <div
@@ -256,7 +205,7 @@ export function MultipleContainers({
               margin: "100px auto",
             }}
           >
-            {containers.map((containerId) => (
+            {schedule.map((containerId) => (
               <DroppableContainer
                 key={containerId}
                 id={containerId}
@@ -307,7 +256,7 @@ export function MultipleContainers({
       {createPortal(
         <DragOverlay adjustScale={adjustScale} dropAnimation={dropAnimation}>
           {activeId
-            ? containers.includes(activeId)
+            ? schedule.includes(activeId)
               ? renderContainerDragOverlay(activeId)
               : renderSortableItemDragOverlay(activeId)
             : null}

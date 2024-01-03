@@ -1,10 +1,8 @@
+import { UniqueIdentifier } from "@dnd-kit/core";
 
-type CourseID = string;
-type SemesterID = string;
-
-interface Schedule {
-  semesters: SemesterID[]; //ordered
-}
+type CourseID = string | UniqueIdentifier;
+type SemesterID = string | UniqueIdentifier;
+type Schedule = SemesterID[];
 
 interface Semester {
   id: SemesterID;
