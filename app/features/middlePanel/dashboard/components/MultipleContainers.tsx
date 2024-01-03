@@ -31,7 +31,7 @@ import { Container, ContainerProps } from "./ui/index";
 import SortableItem from "./SortableItem";
 import { createRange, getColor, dropAnimation, animateLayoutChanges, getIndex, findContainer } from "../helpers/utilities";
 import { Items } from "../types";
-import { collisionDetectionStrategy as detectionStrategy, handleAddColumn, handleDragEnd, handleDragOver, handleRemove } from "../helpers/logic";
+import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logic";
 import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDraghandlers";
 
@@ -239,28 +239,8 @@ export function MultipleContainers({
         setActiveId(active.id);
         setClonedItems(items);
       }}
-      onDragOver={(event) => {
-        handleDragOver(
-          event,
-          items,
-          TRASH_ID,
-          setItems,
-          recentlyMovedToNewContainer
-        )
-      }}
-
-      onDragEnd={(event: DragEndEvent) => {
-        handleDragEnd(
-          event,
-          items,
-          TRASH_ID,
-          activeId,
-          PLACEHOLDER_ID,
-          setContainers,
-          setActiveId,
-          setItems,
-        )
-      }}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
       cancelDrop={cancelDrop}
       onDragCancel={onDragCancel}
       modifiers={modifiers}
@@ -295,7 +275,7 @@ export function MultipleContainers({
                 scrollable={scrollable}
                 style={containerStyle}
                 unstyled={minimal}
-                onRemove={() => handleRemove(containerId, setContainers)}
+                onRemove={() => handleRemove(containerId)}
               >
                 <SortableContext items={items[containerId]} strategy={strategy}>
                   {items[containerId].map((value, index) => {
@@ -324,9 +304,7 @@ export function MultipleContainers({
                 id={PLACEHOLDER_ID}
                 disabled={isSortingContainer}
                 items={empty}
-                onClick={() => {
-                  handleAddColumn(setContainers, setItems, items);
-                }}
+                onClick={handleAddColumn}
                 placeholder
               >
                 + Add column

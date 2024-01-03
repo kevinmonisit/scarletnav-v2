@@ -153,11 +153,7 @@ export default function useDragHandlers(
     setActiveId(null);
   }
 
-  const handleAddColumn = (
-    setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
-    setItems: React.Dispatch<React.SetStateAction<Items>>,
-    items: Items,
-  ) => {
+  const handleAddColumn = () => {
     const newContainerId = getNextContainerId(items);
 
     unstable_batchedUpdates(() => {
@@ -171,7 +167,6 @@ export default function useDragHandlers(
 
   const handleRemove = (
     containerID: UniqueIdentifier,
-    setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
   ) => {
     setContainers((containers) =>
       containers.filter((id) => id !== containerID)
