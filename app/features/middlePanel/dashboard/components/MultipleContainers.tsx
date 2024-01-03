@@ -33,7 +33,7 @@ import { createRange, getColor, dropAnimation, animateLayoutChanges, getIndex, f
 import { Items } from "../types";
 import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logic";
 import useOverlayComponents from "../helpers/useOverlayComponents";
-import useDragHandlers from "../helpers/useDraghandlers";
+import useDragHandlers from "../helpers/useDragHandlers";
 
 function DroppableContainer({
   children,
@@ -161,6 +161,14 @@ export function MultipleContainers({
   const lastOverId = useRef<UniqueIdentifier | null>(null);
   const recentlyMovedToNewContainer = useRef(false);
   const isSortingContainer = activeId ? containers.includes(activeId) : false;
+  const [clonedItems, setClonedItems] = useState<Items | null>(null);
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter,
+    })
+  );
 
   const { renderSortableItemDragOverlay, renderContainerDragOverlay } = useOverlayComponents(
     items,
@@ -177,12 +185,15 @@ export function MultipleContainers({
     handleDragEnd,
     handleRemove,
     handleAddColumn,
+    handleDragCancel
   } = useDragHandlers(
     items,
     TRASH_ID,
     activeId,
     PLACEHOLDER_ID,
     recentlyMovedToNewContainer,
+    clonedItems,
+    setClonedItems,
     setContainers,
     setActiveId,
     setItems,
@@ -199,26 +210,6 @@ export function MultipleContainers({
     ),
     [activeId, items]
   );
-
-  const [clonedItems, setClonedItems] = useState<Items | null>(null);
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter,
-    })
-  );
-
-  const onDragCancel = () => {
-    if (clonedItems) {
-      // Reset items to their original state in case items have been
-      // Dragged across containers
-      setItems(clonedItems);
-    }
-
-    setActiveId(null);
-    setClonedItems(null);
-  };
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -242,7 +233,7 @@ export function MultipleContainers({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       cancelDrop={cancelDrop}
-      onDragCancel={onDragCancel}
+      onDragCancel={handleDragCancel}
       modifiers={modifiers}
     >
       <div

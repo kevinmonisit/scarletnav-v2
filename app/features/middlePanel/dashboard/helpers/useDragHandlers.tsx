@@ -11,6 +11,8 @@ export default function useDragHandlers(
   activeId: UniqueIdentifier | null,
   PLACEHOLDER_ID: string,
   recentlyMovedToNewContainer: React.MutableRefObject<boolean>,
+  clonedItems: Items | null,
+  setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
   setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
   setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
   setItems: React.Dispatch<React.SetStateAction<Items>>
@@ -153,6 +155,17 @@ export default function useDragHandlers(
     setActiveId(null);
   }
 
+  const handleDragCancel = () => {
+    if (clonedItems) {
+      // Reset items to their original state in case items have been
+      // Dragged across containers
+      setItems(clonedItems);
+    }
+
+    setActiveId(null);
+    setClonedItems(null);
+  };
+
   const handleAddColumn = () => {
     const newContainerId = getNextContainerId(items);
 
@@ -178,5 +191,6 @@ export default function useDragHandlers(
     handleDragEnd,
     handleAddColumn,
     handleRemove,
+    handleDragCancel
   }
 }
