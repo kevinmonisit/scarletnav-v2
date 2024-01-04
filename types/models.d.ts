@@ -1,5 +1,11 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
 
+enum STORE_NAMES {
+  schedule = 'schedule',
+  courses = 'courses',
+  semesters = 'semesters',
+}
+
 type CourseID = string | UniqueIdentifier;
 type SemesterID = string | UniqueIdentifier;
 type Schedule = SemesterID[];

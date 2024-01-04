@@ -31,7 +31,7 @@ import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logi
 import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDragHandlers";
 import DroppableContainer from "./DroppableContainer";
-import { getSchedule } from "@/lib/database";
+import { getSchedule } from "@/lib/api/scheduleAPI";
 import { CourseID } from "@/types/models";
 
 interface Props {
@@ -66,7 +66,7 @@ export const TRASH_ID = "void";
 const PLACEHOLDER_ID = "placeholder";
 const empty: UniqueIdentifier[] = [];
 
-export function MultipleContainers({
+export async function MultipleContainers({
   adjustScale = false,
   itemCount = 3,
   cancelDrop,
@@ -85,9 +85,11 @@ export function MultipleContainers({
   vertical = false,
   scrollable,
 }: Props) {
+  const scheduleData = await getSchedule();
+
   const [items, setItems] = useState<dashboardOverviewState>(
     () => {
-      const { semesters } = getSchedule();
+      const { semesters } = scheduleData;
       console.log('hello');
 
       const data: dashboardOverviewState = {};
