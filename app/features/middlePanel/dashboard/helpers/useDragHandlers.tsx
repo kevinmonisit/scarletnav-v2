@@ -7,6 +7,7 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { indexDB } from '@/lib/client/indexDB';
 import { createDummySchedule } from '@/lib/api/scheduleAPI';
 import { db } from '@/lib/client/db';
+import { SemesterOrder } from '@/types/models';
 
 export default function useDragHandlers(
   items: Items,
@@ -17,18 +18,17 @@ export default function useDragHandlers(
   clonedItems: Items | null,
   containers: UniqueIdentifier[],
   setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
-  setContainers_: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
+  setSemesterOrder: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
   setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
-  setItems_: React.Dispatch<React.SetStateAction<Items>>,
+  setItems: React.Dispatch<React.SetStateAction<Items>>,
 ) {
-  const setItems = (items) => {
-    setItems_(items);
+  const setItemsWrapper = (items: Items) => {
+    setItems(() => items);
     db.setSemesters(items);
   }
 
-  const setContainers = (containers: any) => {
-    console.log('fucking containers', containers);
-    setContainers_(containers);
+  const setSemesterOrderWrapper = (containers: SemesterOrder) => {
+    setSemesterOrder(() => containers);
     db.setSemesterOrder(containers);
   }
 
@@ -73,7 +73,7 @@ export default function useDragHandlers(
 
       recentlyMovedToNewContainer.current = true;
 
-      setItems({
+      setItemsWrapper({
         ...items,
         [activeContainer]: items[activeContainer].filter(
           (item) => item !== active.id
@@ -101,7 +101,7 @@ export default function useDragHandlers(
       const activeIndex = containers.indexOf(active.id);
       const overIndex = containers.indexOf(over.id);
 
-      setContainers(arrayMove(containers, activeIndex, overIndex));
+      setSemesterOrderWrapper(arrayMove(containers, activeIndex, overIndex));
 
     }
 
@@ -124,7 +124,7 @@ export default function useDragHandlers(
     console.log('drag end 2');
 
     if (overId === TRASH_ID) {
-      setItems({
+      setItemsWrapper({
         ...items,
         [activeContainer]: items[activeContainer].filter(
           (id) => id !== activeId
@@ -140,8 +140,8 @@ export default function useDragHandlers(
       );
 
       unstable_batchedUpdates(() => {
-        setContainers([...containers, newContainerId]);
-        setItems({
+        setSemesterOrderWrapper([...containers, newContainerId]);
+        setItemsWrapper({
           ...items,
           [activeContainer]: items[activeContainer].filter(
             (id) => id !== activeId
@@ -162,7 +162,7 @@ export default function useDragHandlers(
       const overIndex = items[overContainer].indexOf(overId);
 
       if (activeIndex !== overIndex) {
-        setItems({
+        setItemsWrapper({
           ...items,
           [overContainer]: arrayMove(
             items[overContainer],
@@ -172,9 +172,6 @@ export default function useDragHandlers(
         });
       }
     }
-
-    console.log('drag end 4');
-
     setActiveId(null);
   }
 
@@ -182,7 +179,7 @@ export default function useDragHandlers(
     if (clonedItems) {
       // Reset items to their original state in case items have been
       // Dragged across containers
-      setItems(clonedItems);
+      setItemsWrapper(clonedItems);
     }
 
     setActiveId(null);
@@ -190,24 +187,22 @@ export default function useDragHandlers(
   };
 
   const handleAddColumn = () => {
-    console.log('test');
-    db.populate();
-    // indexDB.setSchedule(createDummySchedule());
-    // const newContainerId = getNextContainerId(items);
+    indexDB.setSchedule(createDummySchedule());
+    const newContainerId = getNextContainerId(items);
 
-    // unstable_batchedUpdates(() => {
-    //   setContainers((containers) => [...containers, newContainerId]);
-    //   setItems((items) => ({
-    //     ...items,
-    //     [newContainerId]: [],
-    //   }));
-    // });
+    unstable_batchedUpdates(() => {
+      setSemesterOrderWrapper([...containers, newContainerId]);
+      setItemsWrapper({
+        ...items,
+        [newContainerId]: [],
+      });
+    });
   }
 
   const handleRemove = (
     containerID: UniqueIdentifier,
   ) => {
-    setContainers(containers.filter((id) => id !== containerID));
+    setSemesterOrderWrapper(containers.filter((id) => id !== containerID));
   }
 
   return {

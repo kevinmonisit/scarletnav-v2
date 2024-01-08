@@ -42,7 +42,6 @@ export class UserScheduleDatabase extends Dexie {
     await this.semesters.bulkAdd(semesters);
     await this.courses.bulkAdd(courses);
     await this.schedule.add({
-      id: 'schedule',
       semesterOrder: dummy.semesterOrder
     });
   }

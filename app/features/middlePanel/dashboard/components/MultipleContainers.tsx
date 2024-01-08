@@ -31,10 +31,7 @@ import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logi
 import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDragHandlers";
 import DroppableContainer from "./DroppableContainer";
-import { getSchedule } from "@/lib/api/scheduleAPI";
 import { db } from "@/lib/client/db";
-import { useLiveQuery } from "dexie-react-hooks";
-import { ScheduleState, Semester } from "@/types/models";
 
 interface Props {
   adjustScale?: boolean;
@@ -149,8 +146,6 @@ export function MultipleContainers({
     [activeId, items]
   );
 
-  // const _ = useLiveQuery(() => db.courses.toArray());
-
   useEffect(() => {
 
     const initState = async () => {
@@ -165,12 +160,9 @@ export function MultipleContainers({
         data[id] = [...courses];
       });
 
-      console.log(data);
-      console.log(schedule[0]);
 
       if (!schedule || !schedule[0]) {
         db.populate();
-        console.log('SCHEDULE: ', schedule);
       }
 
       setItems(data);
@@ -181,10 +173,6 @@ export function MultipleContainers({
     initState();
 
   }, []);
-
-  useLiveQuery(async () => {
-
-  });
 
   useEffect(() => {
     requestAnimationFrame(() => {
