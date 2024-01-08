@@ -8,7 +8,6 @@ export const DB_NAME = 'USER_SCHEDULE';
 const DB_VERSION = 1;
 
 interface SemesterOrderSave {
-  id: string;
   semesterOrder: SemesterOrder;
 }
 
@@ -57,30 +56,21 @@ export class UserScheduleDatabase extends Dexie {
     console.log(semesters);
 
     db.transaction('rw', db.semesters, async ()=>{
-
-      //
-      // Transaction Scope
-      //
-
       await db.semesters.clear();
       await db.semesters.bulkAdd(semesters);
+    }).catch(err => {
+        console.error(err.stack);
+    });
+  }
 
-  }).then(() => {
-
-      //
-      // Transaction Complete
-      //
-
-      console.log("Transaction committed");
-
-  }).catch(err => {
-
-      //
-      // Transaction Failed
-      //
-
-      console.error(err.stack);
-  });
+  async setSemesterOrder(semesterOrder: SemesterOrder) {
+    console.log(semesterOrder);
+    db.schedule.update('schedule', {"semesterOrder": semesterOrder}).then(function (updated) {
+      if (updated)
+        console.log("Updated semesterOrder to: " + semesterOrder);
+      else
+        console.log("Nothing was updated - there were no semesterOrder");
+    });
   }
 }
 

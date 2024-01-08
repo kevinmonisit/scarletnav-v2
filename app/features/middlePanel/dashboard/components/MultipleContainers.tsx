@@ -130,6 +130,7 @@ export function MultipleContainers({
     PLACEHOLDER_ID,
     recentlyMovedToNewContainer,
     clonedItems,
+    schedule,
     setClonedItems,
     setSchedule,
     setActiveId,
@@ -150,29 +151,39 @@ export function MultipleContainers({
 
   // const _ = useLiveQuery(() => db.courses.toArray());
 
-  useLiveQuery(async () => {
-    const courses = await db.courses.toArray();
-    const semesters = await db.semesters.toArray();
-    const schedule = await db.schedule.toArray();
+  useEffect(() => {
 
-    const data: dashboardOverviewState = {};
-    semesters.forEach((semester) => {
-      const { id, courses } = semester;
+    const initState = async () => {
+      const courses = await db.courses.toArray();
+      const semesters = await db.semesters.toArray();
+      const schedule = await db.schedule.toArray();
 
-      data[id] = [...courses];
-    });
+      const data: dashboardOverviewState = {};
+      semesters.forEach((semester) => {
+        const { id, courses } = semester;
 
-    console.log(data);
-    console.log(schedule[0]);
+        data[id] = [...courses];
+      });
 
-    if (!schedule || !schedule[0]) {
-      db.populate();
-      console.log('SCHEDULE: ', schedule);
+      console.log(data);
+      console.log(schedule[0]);
+
+      if (!schedule || !schedule[0]) {
+        db.populate();
+        console.log('SCHEDULE: ', schedule);
+      }
+
+      setItems(data);
+      setSchedule(schedule[0].semesterOrder);
+      setLoadingCourses(false);
     }
 
-    setItems(data);
-    setSchedule(schedule[0].semesterOrder);
-    setLoadingCourses(false);
+    initState();
+
+  }, []);
+
+  useLiveQuery(async () => {
+
   });
 
   useEffect(() => {

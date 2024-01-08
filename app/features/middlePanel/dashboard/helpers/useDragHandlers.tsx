@@ -15,14 +15,21 @@ export default function useDragHandlers(
   PLACEHOLDER_ID: string,
   recentlyMovedToNewContainer: React.MutableRefObject<boolean>,
   clonedItems: Items | null,
+  containers: UniqueIdentifier[],
   setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
-  setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
+  setContainers_: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
   setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
   setItems_: React.Dispatch<React.SetStateAction<Items>>,
 ) {
-  const setItems = (items: any) => {
+  const setItems = (items) => {
     setItems_(items);
     db.setSemesters(items);
+  }
+
+  const setContainers = (containers: any) => {
+    console.log('fucking containers', containers);
+    setContainers_(containers);
+    db.setSemesterOrder(containers);
   }
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -90,12 +97,12 @@ export default function useDragHandlers(
     const { active, over } = event;
 
     if (active.id in items && over?.id) {
-      setContainers((containers) => {
-        const activeIndex = containers.indexOf(active.id);
-        const overIndex = containers.indexOf(over.id);
 
-        return arrayMove(containers, activeIndex, overIndex);
-      });
+      const activeIndex = containers.indexOf(active.id);
+      const overIndex = containers.indexOf(over.id);
+
+      setContainers(arrayMove(containers, activeIndex, overIndex));
+
     }
 
     console.log('drag end 1');
@@ -133,7 +140,7 @@ export default function useDragHandlers(
       );
 
       unstable_batchedUpdates(() => {
-        setContainers((containers) => [...containers, newContainerId]);
+        setContainers([...containers, newContainerId]);
         setItems({
           ...items,
           [activeContainer]: items[activeContainer].filter(
@@ -200,9 +207,7 @@ export default function useDragHandlers(
   const handleRemove = (
     containerID: UniqueIdentifier,
   ) => {
-    setContainers((containers) =>
-      containers.filter((id) => id !== containerID)
-    );
+    setContainers(containers.filter((id) => id !== containerID));
   }
 
   return {
