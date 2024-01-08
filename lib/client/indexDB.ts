@@ -11,14 +11,6 @@ let db: dbType = undefined;
 
 const STORE_NAME_ARRAY = Object.values(STORE_NAMES);
 
-window.addEventListener('unhandledrejection', event => {
-  let request = event.target;
-  let error = event.reason;
-
-  console.error('error', error);
-  console.error('request', request);
-});
-
 async function initializeStores(db: dbType) {
   if(db == null) {
     throw new Error('db is undefined');

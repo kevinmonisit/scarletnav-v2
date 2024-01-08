@@ -2,6 +2,7 @@
 import Dexie, { Table } from 'dexie';
 import { Course, Semester, SemesterOrder } from '@/types/models';
 import { createDummySchedule } from '../api/scheduleAPI';
+import { dashboardOverviewState } from '@/app/features/middlePanel/dashboard/types';
 
 export const DB_NAME = 'USER_SCHEDULE';
 const DB_VERSION = 1;
@@ -45,7 +46,41 @@ export class UserScheduleDatabase extends Dexie {
       id: 'schedule',
       semesterOrder: dummy.semesterOrder
     });
+  }
 
+  async setSemesters(items: dashboardOverviewState) {
+    const semesters = Object.entries(items).map(([id, courses]) => ({
+      id,
+      courses
+    }));
+
+    console.log(semesters);
+
+    db.transaction('rw', db.semesters, async ()=>{
+
+      //
+      // Transaction Scope
+      //
+
+      await db.semesters.clear();
+      await db.semesters.bulkAdd(semesters);
+
+  }).then(() => {
+
+      //
+      // Transaction Complete
+      //
+
+      console.log("Transaction committed");
+
+  }).catch(err => {
+
+      //
+      // Transaction Failed
+      //
+
+      console.error(err.stack);
+  });
   }
 }
 

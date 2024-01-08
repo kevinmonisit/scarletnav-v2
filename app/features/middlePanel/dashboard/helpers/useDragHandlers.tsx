@@ -1,6 +1,6 @@
 import { DragOverEvent, UniqueIdentifier } from '@dnd-kit/core';
 import React from 'react';
-import { Items } from '../types';
+import { Items, dashboardOverviewState } from '../types';
 import { findContainer, getNextContainerId } from './utilities';
 import { arrayMove } from '@dnd-kit/sortable';
 import { unstable_batchedUpdates } from 'react-dom';
@@ -18,10 +18,15 @@ export default function useDragHandlers(
   setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
   setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
   setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
-  setItems: React.Dispatch<React.SetStateAction<Items>>
+  setItems_: React.Dispatch<React.SetStateAction<Items>>,
 ) {
+  const setItems = (items: any) => {
+    setItems_(items);
+    db.setSemesters(items);
+  }
 
   const handleDragOver = (event: DragOverEvent) => {
+    console.log('drag over');
     const { active, over } = event;
     const overId = over?.id;
 
@@ -37,51 +42,51 @@ export default function useDragHandlers(
     }
 
     if (activeContainer !== overContainer) {
-      setItems((items) => {
-        const activeItems = items[activeContainer];
-        const overItems = items[overContainer];
-        const overIndex = overItems.indexOf(overId);
-        const activeIndex = activeItems.indexOf(active.id);
+      const activeItems = items[activeContainer];
+      const overItems = items[overContainer];
+      const overIndex = overItems.indexOf(overId);
+      const activeIndex = activeItems.indexOf(active.id);
 
-        let newIndex: number;
+      let newIndex: number;
 
-        if (overId in items) {
-          newIndex = overItems.length + 1;
-        } else {
-          const isBelowOverItem =
-            over &&
-            active.rect.current.translated &&
-            active.rect.current.translated.top >
-            over.rect.top + over.rect.height;
+      if (overId in items) {
+        newIndex = overItems.length + 1;
+      } else {
+        const isBelowOverItem =
+          over &&
+          active.rect.current.translated &&
+          active.rect.current.translated.top >
+          over.rect.top + over.rect.height;
 
-          const modifier = isBelowOverItem ? 1 : 0;
+        const modifier = isBelowOverItem ? 1 : 0;
 
-          newIndex =
-            overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
-        }
+        newIndex =
+          overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+      }
 
-        recentlyMovedToNewContainer.current = true;
+      recentlyMovedToNewContainer.current = true;
 
-        return {
-          ...items,
-          [activeContainer]: items[activeContainer].filter(
-            (item) => item !== active.id
+      setItems({
+        ...items,
+        [activeContainer]: items[activeContainer].filter(
+          (item) => item !== active.id
+        ),
+        [overContainer]: [
+          ...items[overContainer].slice(0, newIndex),
+          items[activeContainer][activeIndex],
+          ...items[overContainer].slice(
+            newIndex,
+            items[overContainer].length
           ),
-          [overContainer]: [
-            ...items[overContainer].slice(0, newIndex),
-            items[activeContainer][activeIndex],
-            ...items[overContainer].slice(
-              newIndex,
-              items[overContainer].length
-            ),
-          ],
-        };
+        ],
       });
+
     }
   }
 
 
   const handleDragEnd = (event: DragOverEvent) => {
+    console.log('drag end 0');
     const { active, over } = event;
 
     if (active.id in items && over?.id) {
@@ -92,6 +97,8 @@ export default function useDragHandlers(
         return arrayMove(containers, activeIndex, overIndex);
       });
     }
+
+    console.log('drag end 1');
 
     const activeContainer = findContainer(items, active.id);
 
@@ -107,13 +114,15 @@ export default function useDragHandlers(
       return;
     }
 
+    console.log('drag end 2');
+
     if (overId === TRASH_ID) {
-      setItems((items) => ({
+      setItems({
         ...items,
         [activeContainer]: items[activeContainer].filter(
           (id) => id !== activeId
         ),
-      }));
+      });
       setActiveId(null);
       return;
     }
@@ -125,17 +134,19 @@ export default function useDragHandlers(
 
       unstable_batchedUpdates(() => {
         setContainers((containers) => [...containers, newContainerId]);
-        setItems((items) => ({
+        setItems({
           ...items,
           [activeContainer]: items[activeContainer].filter(
             (id) => id !== activeId
           ),
           [newContainerId]: [active.id],
-        }));
+        });
         setActiveId(null);
       });
       return;
     }
+
+    console.log('drag end 3');
 
     const overContainer = findContainer(items, overId);
 
@@ -144,16 +155,18 @@ export default function useDragHandlers(
       const overIndex = items[overContainer].indexOf(overId);
 
       if (activeIndex !== overIndex) {
-        setItems((items) => ({
+        setItems({
           ...items,
           [overContainer]: arrayMove(
             items[overContainer],
             activeIndex,
             overIndex
           ),
-        }));
+        });
       }
     }
+
+    console.log('drag end 4');
 
     setActiveId(null);
   }

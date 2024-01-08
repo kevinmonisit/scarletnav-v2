@@ -151,7 +151,6 @@ export function MultipleContainers({
   // const _ = useLiveQuery(() => db.courses.toArray());
 
   useLiveQuery(async () => {
-    console.log('test from live query');
     const courses = await db.courses.toArray();
     const semesters = await db.semesters.toArray();
     const schedule = await db.schedule.toArray();
@@ -166,9 +165,13 @@ export function MultipleContainers({
     console.log(data);
     console.log(schedule[0]);
 
+    if (!schedule || !schedule[0]) {
+      db.populate();
+      console.log('SCHEDULE: ', schedule);
+    }
+
     setItems(data);
     setSchedule(schedule[0].semesterOrder);
-    // setSchedule);
     setLoadingCourses(false);
   });
 
