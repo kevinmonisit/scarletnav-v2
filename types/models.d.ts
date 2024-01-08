@@ -1,6 +1,6 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
 
-enum STORE_NAMES {
+export enum STORE_NAMES {
   schedule = 'schedule',
   courses = 'courses',
   semesters = 'semesters',
@@ -8,28 +8,28 @@ enum STORE_NAMES {
 
 type CourseID = string | UniqueIdentifier;
 type SemesterID = string | UniqueIdentifier;
-type Schedule = SemesterID[];
+type SemesterOrder = SemesterID[];
 
-interface Semester {
+export interface Semester {
   id: SemesterID;
   courses: CourseID[]; //ordered
 }
 
-interface Course {
+export interface Course {
   id: CourseID;
   name: string;
   credits: number;
 }
 
-interface ScheduleState {
-  schedule: Schedule;
+export interface ScheduleState {
+  semesterOrder: SemesterOrder;
   semesters: Map<SemesterID, Semester>;
   courses: Map<CourseID, Course>;
 }
 
-interface ScheduleActions {
+export interface ScheduleActions {
   setSchedule(
-    schedule: Schedule,
+    schedule: Semester,
     semesters: Map<SemesterID, Semester>,
     courses: Map<CourseID, Course>
   ): void,

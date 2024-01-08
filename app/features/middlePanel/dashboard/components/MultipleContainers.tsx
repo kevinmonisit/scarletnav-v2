@@ -32,7 +32,9 @@ import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDragHandlers";
 import DroppableContainer from "./DroppableContainer";
 import { getSchedule } from "@/lib/api/scheduleAPI";
-import { CourseID } from "@/types/models";
+import { db } from "@/lib/client/db";
+import { useLiveQuery } from "dexie-react-hooks";
+import { ScheduleState, Semester } from "@/types/models";
 
 interface Props {
   adjustScale?: boolean;
@@ -66,7 +68,7 @@ export const TRASH_ID = "void";
 const PLACEHOLDER_ID = "placeholder";
 const empty: UniqueIdentifier[] = [];
 
-export async function MultipleContainers({
+export function MultipleContainers({
   adjustScale = false,
   itemCount = 3,
   cancelDrop,
@@ -85,30 +87,13 @@ export async function MultipleContainers({
   vertical = false,
   scrollable,
 }: Props) {
-  const scheduleData = await getSchedule();
-
-  const [items, setItems] = useState<dashboardOverviewState>(
-    () => {
-      const { semesters } = scheduleData;
-      console.log('hello');
-
-      const data: dashboardOverviewState = {};
-      Array.from(semesters).forEach(([key, value]) => {
-        data[key] = value.courses.map(course => course);
-      });
-
-      return data;
-    }
-  );
-
-  const [schedule, setSchedule] = useState(
-    Object.keys(items) as UniqueIdentifier[]
-  );
+  const [items, setItems] = useState<dashboardOverviewState>({});
+  const [schedule, setSchedule] = useState<UniqueIdentifier[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState<boolean>(true);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const lastOverId = useRef<UniqueIdentifier | null>(null);
   const recentlyMovedToNewContainer = useRef(false);
-  const isSortingContainer = activeId ? schedule.includes(activeId) : false;
   const [clonedItems, setClonedItems] = useState<Items | null>(null);
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -118,6 +103,7 @@ export async function MultipleContainers({
     })
   );
 
+  const isSortingContainer = activeId ? schedule.includes(activeId) : false;
   const {
     renderSortableItemDragOverlay,
     renderContainerDragOverlay
@@ -162,11 +148,39 @@ export async function MultipleContainers({
     [activeId, items]
   );
 
+  // const _ = useLiveQuery(() => db.courses.toArray());
+
+  useLiveQuery(async () => {
+    console.log('test from live query');
+    const courses = await db.courses.toArray();
+    const semesters = await db.semesters.toArray();
+    const schedule = await db.schedule.toArray();
+
+    const data: dashboardOverviewState = {};
+    semesters.forEach((semester) => {
+      const { id, courses } = semester;
+
+      data[id] = [...courses];
+    });
+
+    console.log(data);
+    console.log(schedule[0]);
+
+    setItems(data);
+    setSchedule(schedule[0].semesterOrder);
+    // setSchedule);
+    setLoadingCourses(false);
+  });
+
   useEffect(() => {
     requestAnimationFrame(() => {
       recentlyMovedToNewContainer.current = false;
     });
   }, [items]);
+
+  if (loadingCourses) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <DndContext

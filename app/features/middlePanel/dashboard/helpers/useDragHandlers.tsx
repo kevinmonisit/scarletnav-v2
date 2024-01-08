@@ -4,6 +4,9 @@ import { Items } from '../types';
 import { findContainer, getNextContainerId } from './utilities';
 import { arrayMove } from '@dnd-kit/sortable';
 import { unstable_batchedUpdates } from 'react-dom';
+import { indexDB } from '@/lib/client/indexDB';
+import { createDummySchedule } from '@/lib/api/scheduleAPI';
+import { db } from '@/lib/client/db';
 
 export default function useDragHandlers(
   items: Items,
@@ -167,15 +170,18 @@ export default function useDragHandlers(
   };
 
   const handleAddColumn = () => {
-    const newContainerId = getNextContainerId(items);
+    console.log('test');
+    db.populate();
+    // indexDB.setSchedule(createDummySchedule());
+    // const newContainerId = getNextContainerId(items);
 
-    unstable_batchedUpdates(() => {
-      setContainers((containers) => [...containers, newContainerId]);
-      setItems((items) => ({
-        ...items,
-        [newContainerId]: [],
-      }));
-    });
+    // unstable_batchedUpdates(() => {
+    //   setContainers((containers) => [...containers, newContainerId]);
+    //   setItems((items) => ({
+    //     ...items,
+    //     [newContainerId]: [],
+    //   }));
+    // });
   }
 
   const handleRemove = (

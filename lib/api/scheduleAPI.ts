@@ -1,6 +1,6 @@
 'use client';
 
-import { Course, Semester, Schedule, ScheduleState, CourseID } from "@/types/models";
+import { Course, Semester, SemesterOrder, ScheduleState, CourseID } from "@/types/models";
 import { indexDB } from "../client/indexDB";
 
 function createCourseArray() {
@@ -20,9 +20,9 @@ const semesterArray: Semester[] = Array.from({ length: NUM_SEMESTERS}, (_, i) =>
   courses: allCourses[i].map(course => course.id),
 }));
 
-const schedule: Schedule = semesterArray.map(semester => semester.id);
+const semesterOrder = semesterArray.map(semester => semester.id);
 
-const createDummySchedule = (): ScheduleState => {
+export const createDummySchedule = (): ScheduleState => {
   const courses = new Map<CourseID, Course>();
 
   allCourses.forEach(semester => {
@@ -33,16 +33,19 @@ const createDummySchedule = (): ScheduleState => {
 
   const semesters = new Map(semesterArray.map(semester => [semester.id, semester]));
   return {
-    schedule,
+    semesterOrder,
     semesters,
     courses,
   };
 }
 
 export const getSchedule = async (): Promise<ScheduleState> => {
-    indexDB.initDB();
+    await indexDB.initDB();
 
     const schedule = await indexDB.getSchedule();
+
+    indexDB.setSchedule(createDummySchedule());
+
     if (!schedule) {
       console.log('no schedule found in indexDB, creating dummy schedule');
       return createDummySchedule();
