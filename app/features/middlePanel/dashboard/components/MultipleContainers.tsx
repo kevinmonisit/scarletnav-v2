@@ -32,6 +32,9 @@ import useOverlayComponents from "../helpers/useOverlayComponents";
 import useDragHandlers from "../helpers/useDragHandlers";
 import DroppableContainer from "./DroppableContainer";
 import { db } from "@/lib/client/db";
+import { useScheduleStore } from "@/lib/stores/useScheduleStore";
+import useDnDHandleStore from "@/lib/stores/useDnDHandleStore";
+import useScheduleHandlers from "../helpers/useScheduleHandlers";
 
 interface Props {
   adjustScale?: boolean;
@@ -84,125 +87,51 @@ export function MultipleContainers({
   vertical = false,
   scrollable,
 }: Props) {
-  const [items, setItems] = useState<dashboardOverviewState>({});
-  const [schedule, setSchedule] = useState<UniqueIdentifier[]>([]);
-  const [loadingCourses, setLoadingCourses] = useState<boolean>(true);
 
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  const lastOverId = useRef<UniqueIdentifier | null>(null);
-  const recentlyMovedToNewContainer = useRef(false);
-  const [clonedItems, setClonedItems] = useState<Items | null>(null);
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter,
-    })
-  );
+  const semesterOrder = useScheduleStore((state) => state.semesterOrder);
+  const coursesBySemesterID = useScheduleStore((state) => state.coursesBySemesterID);
 
-  const isSortingContainer = activeId ? schedule.includes(activeId) : false;
+  const { recentlyMovedToNewContainer, activeID, setActiveID } = useDnDHandleStore((state) => {
+    const { recentlyMovedToNewContainer, activeID, setActiveID } = state;
+
+    return {
+      recentlyMovedToNewContainer,
+      activeID,
+      setActiveID,
+    }
+  });
+
+  const isSortingContainer = activeID ? semesterOrder.includes(activeID) : false;
   const {
-    renderSortableItemDragOverlay,
-    renderContainerDragOverlay
+    renderContainerDragOverlay,
+    renderSortableItemDragOverlay
   } = useOverlayComponents(
-    items,
-    columns,
-    handle,
-    renderItem,
+    coursesBySemesterID,
     getColor,
     getItemStyles,
-    wrapperStyle,
   );
 
   const {
-    handleDragOver,
-    handleDragEnd,
-    handleRemove,
     handleAddColumn,
-    handleDragCancel
-  } = useDragHandlers(
-    items,
-    TRASH_ID,
-    activeId,
-    PLACEHOLDER_ID,
-    recentlyMovedToNewContainer,
-    clonedItems,
-    schedule,
-    setClonedItems,
-    setSchedule,
-    setActiveId,
-    setItems,
-  );
+    handleRemove,
+  } = useScheduleHandlers();
 
-  const collisionDetectionStrategy: CollisionDetection = useCallback(
-    (args) => detectionStrategy(
-      args,
-      activeId,
-      lastOverId,
-      items,
-      TRASH_ID,
-      recentlyMovedToNewContainer
-    ),
-    [activeId, items]
-  );
-
-  useEffect(() => {
-
-    const initState = async () => {
-      const courses = await db.courses.toArray();
-      const semesters = await db.semesters.toArray();
-      const schedule = await db.schedule.toArray();
-
-      const data: dashboardOverviewState = {};
-      semesters.forEach((semester) => {
-        const { id, courses } = semester;
-
-        data[id] = [...courses];
-      });
-
-
-      if (!schedule || !schedule[0]) {
-        db.populate();
-      }
-
-      setItems(data);
-      setSchedule(schedule[0].semesterOrder);
-      setLoadingCourses(false);
-    }
-
-    initState();
-
-  }, []);
 
   useEffect(() => {
     requestAnimationFrame(() => {
+      if (recentlyMovedToNewContainer == null) {
+        console.error('recentlyMovedToNewContainer is null! Was it set correctly with useRef?');
+        return;
+      }
+
+      console.log('recentlyMovedToNewContainer.current', recentlyMovedToNewContainer.current);
+
       recentlyMovedToNewContainer.current = false;
     });
-  }, [items]);
-
-  if (loadingCourses) {
-    return <div>Loading...</div>;
-  }
+  }, [coursesBySemesterID, recentlyMovedToNewContainer]);
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={collisionDetectionStrategy}
-      measuring={{
-        droppable: {
-          strategy: MeasuringStrategy.Always,
-        },
-      }}
-      onDragStart={({ active }) => {
-        setActiveId(active.id);
-        setClonedItems(items);
-      }}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-      cancelDrop={cancelDrop}
-      onDragCancel={handleDragCancel}
-      modifiers={modifiers}
-    >
+    <>
       <div
         style={{
           display: "inline-grid",
@@ -212,7 +141,7 @@ export function MultipleContainers({
         }}
       >
         <SortableContext
-          items={[...schedule, PLACEHOLDER_ID]}
+          items={[...semesterOrder, PLACEHOLDER_ID]}
           strategy={rectSortingStrategy}
         >
           <div
@@ -223,20 +152,20 @@ export function MultipleContainers({
               margin: "100px auto",
             }}
           >
-            {schedule.map((containerId) => (
+            {semesterOrder.map((containerId) => (
               <DroppableContainer
                 key={containerId}
                 id={containerId}
                 label={minimal ? undefined : `Column ${containerId}`}
                 columns={columns}
-                items={items[containerId]}
+                items={coursesBySemesterID[containerId]}
                 scrollable={scrollable}
                 style={containerStyle}
                 unstyled={minimal}
                 onRemove={() => handleRemove(containerId)}
               >
-                <SortableContext items={items[containerId]} strategy={strategy}>
-                  {items[containerId].map((value, index) => {
+                <SortableContext items={coursesBySemesterID[containerId]} strategy={strategy}>
+                  {coursesBySemesterID[containerId].map((value, index) => {
                     return (
                       <SortableItem
                         disabled={isSortingContainer}
@@ -249,7 +178,7 @@ export function MultipleContainers({
                         renderItem={renderItem}
                         containerId={containerId}
                         getIndex={(id) => {
-                          return getIndex(items, id);
+                          return getIndex(coursesBySemesterID, id);
                         }}
                       />
                     );
@@ -273,14 +202,14 @@ export function MultipleContainers({
       </div>
       {createPortal(
         <DragOverlay adjustScale={adjustScale} dropAnimation={dropAnimation}>
-          {activeId
-            ? schedule.includes(activeId)
-              ? renderContainerDragOverlay(activeId)
-              : renderSortableItemDragOverlay(activeId)
+          {activeID
+            ? semesterOrder.includes(activeID)
+              ? renderContainerDragOverlay(activeID)
+              : renderSortableItemDragOverlay(activeID)
             : null}
         </DragOverlay>,
         document.body
       )}
-    </DndContext>
+    </>
   );
 }

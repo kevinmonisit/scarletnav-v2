@@ -8,10 +8,6 @@ const MultipleContainers = dynamic<{
   ssr: false
 });
 
-export default function App() {
-  return (
-    <div className="App">
-      <MultipleContainers itemCount={5} />
-    </div>
-  );
+export default function ScheduleBoard() {
+  return (<MultipleContainers itemCount={5} />);
 }

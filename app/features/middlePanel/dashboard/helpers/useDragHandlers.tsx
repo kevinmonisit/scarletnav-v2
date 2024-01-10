@@ -7,28 +7,29 @@ import { unstable_batchedUpdates } from 'react-dom';
 import { indexDB } from '@/lib/client/indexDB';
 import { createDummySchedule } from '@/lib/api/scheduleAPI';
 import { db } from '@/lib/client/db';
-import { SemesterOrder } from '@/types/models';
+import { CoursesBySemesterID, SemesterID, SemesterOrder } from '@/types/models';
 
 export default function useDragHandlers(
   items: Items,
   TRASH_ID: string,
   activeId: UniqueIdentifier | null,
   PLACEHOLDER_ID: string,
-  recentlyMovedToNewContainer: React.MutableRefObject<boolean>,
+  recentlyMovedToNewContainer: React.MutableRefObject<boolean> | null,
   clonedItems: Items | null,
-  containers: UniqueIdentifier[],
+  containers: SemesterOrder,
   setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
-  setSemesterOrder: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>,
-  setActiveId: React.Dispatch<React.SetStateAction<UniqueIdentifier | null>>,
-  setItems: React.Dispatch<React.SetStateAction<Items>>,
+  setSemesterOrder: (semesters: SemesterOrder) => void,
+  setActiveId: (id: SemesterID) => void,
+  setCoursesBySemesterID: (courses: CoursesBySemesterID) => void,
 ) {
+
   const setItemsWrapper = (items: Items) => {
-    setItems(() => items);
+    setCoursesBySemesterID(items);
     db.setSemesters(items);
   }
 
   const setSemesterOrderWrapper = (containers: SemesterOrder) => {
-    setSemesterOrder(() => containers);
+    setSemesterOrder(containers);
     db.setSemesterOrder(containers);
   }
 
@@ -71,6 +72,11 @@ export default function useDragHandlers(
           overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
       }
 
+      if (recentlyMovedToNewContainer === null) {
+        console.error("recentlyMovedToNewContainer is null! Was it set correctly with useRef?");
+        return;
+      }
+
       recentlyMovedToNewContainer.current = true;
 
       setItemsWrapper({
@@ -110,14 +116,14 @@ export default function useDragHandlers(
     const activeContainer = findContainer(items, active.id);
 
     if (!activeContainer) {
-      setActiveId(null);
+      setActiveId("");
       return;
     }
 
     const overId = over?.id;
 
     if (overId == null) {
-      setActiveId(null);
+      setActiveId("");
       return;
     }
 
@@ -130,7 +136,7 @@ export default function useDragHandlers(
           (id) => id !== activeId
         ),
       });
-      setActiveId(null);
+      setActiveId("");
       return;
     }
 
@@ -148,7 +154,7 @@ export default function useDragHandlers(
           ),
           [newContainerId]: [active.id],
         });
-        setActiveId(null);
+        setActiveId("");
       });
       return;
     }
@@ -172,7 +178,13 @@ export default function useDragHandlers(
         });
       }
     }
-    setActiveId(null);
+    setActiveId("");
+  }
+
+  const handleDragStart = (event: DragOverEvent) => {
+    const { active } = event;
+    setActiveId(active.id);
+    setClonedItems(items);
   }
 
   const handleDragCancel = () => {
@@ -182,34 +194,13 @@ export default function useDragHandlers(
       setItemsWrapper(clonedItems);
     }
 
-    setActiveId(null);
+    setActiveId("");
     setClonedItems(null);
   };
-
-  const handleAddColumn = () => {
-    indexDB.setSchedule(createDummySchedule());
-    const newContainerId = getNextContainerId(items);
-
-    unstable_batchedUpdates(() => {
-      setSemesterOrderWrapper([...containers, newContainerId]);
-      setItemsWrapper({
-        ...items,
-        [newContainerId]: [],
-      });
-    });
-  }
-
-  const handleRemove = (
-    containerID: UniqueIdentifier,
-  ) => {
-    setSemesterOrderWrapper(containers.filter((id) => id !== containerID));
-  }
-
   return {
     handleDragOver,
     handleDragEnd,
-    handleAddColumn,
-    handleRemove,
-    handleDragCancel
+    handleDragCancel,
+    handleDragStart,
   }
 }

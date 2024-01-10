@@ -1,6 +1,4 @@
-import Image from 'next/image';
-import App from '@/app/features/middlePanel/dashboard/App';
-import { Suspense } from 'react';
+import App from '@/app/features/middlePanel/dashboard/ScheduleBoard';
 
 export default function Home() {
   return (

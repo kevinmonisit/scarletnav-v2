@@ -4,15 +4,21 @@ import { Items } from '../types';
 import { Container, Item } from '../components/ui';
 import { findContainer, getIndex } from './utilities';
 
+export const COLUMNS_DEPRECATED_DO_NOT_USE = 5;
+
 export default function useOverlayComponents(
   items: Items,
-  columns: number | undefined,
-  handle: boolean,
-  renderItem: () => React.ReactElement,
+  // handle: boolean,
+  // renderItem: () => React.ReactElement,
   getColor: (id: UniqueIdentifier) => string | undefined,
   getItemStyles: (args: any) => React.CSSProperties,
-  wrapperStyle: (args: any) => React.CSSProperties,
+  // wrapperStyle: (args: any) => React.CSSProperties,
 ) {
+
+  const columns = COLUMNS_DEPRECATED_DO_NOT_USE;
+  const handle = false;
+  const renderItem = () => <></>;
+  const wrapperStyle = (x: any) => ({});
 
   function renderSortableItemDragOverlay(id: UniqueIdentifier) {
     return (

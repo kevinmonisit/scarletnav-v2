@@ -8,6 +8,9 @@ export enum STORE_NAMES {
 
 type CourseID = string | UniqueIdentifier;
 type SemesterID = string | UniqueIdentifier;
+type CourseByID = Record<CourseID, Course>;
+type CoursesBySemesterID = Record<SemesterID, CourseID[]>;
+type SemestersByID = Record<SemesterID, Semester>;
 type SemesterOrder = SemesterID[];
 
 export interface Semester {
@@ -23,16 +26,13 @@ export interface Course {
 
 export interface ScheduleState {
   semesterOrder: SemesterOrder;
-  semesters: Map<SemesterID, Semester>;
-  courses: Map<CourseID, Course>;
+  coursesBySemesterID: CoursesBySemesterID;
+  semesterByID: SemestersByID;
+  courses: CourseByID;
 }
 
 export interface ScheduleActions {
-  setSchedule(
-    schedule: Semester,
-    semesters: Map<SemesterID, Semester>,
-    courses: Map<CourseID, Course>
-  ): void,
-
-  getSchedule(): ScheduleState,
+  setSemesterOrder: (semOrder: SemesterOrder) => void;
+  setCoursesBySemesterID: (semesters: CoursesBySemesterID) => void;
+  setCourses: (courses: CourseByID) => void;
 }

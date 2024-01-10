@@ -15,8 +15,14 @@ export const collisionDetectionStrategy = (
   lastOverId: React.MutableRefObject<UniqueIdentifier | null>,
   items: Items,
   TRASH_ID: string,
-  recentlyMovedToNewContainer: React.MutableRefObject<boolean>
+  recentlyMovedToNewContainer: React.MutableRefObject<boolean> | null
 ) => {
+
+  if (recentlyMovedToNewContainer == null) {
+    console.error('recentlyMovedToNewContainer is null! Was it set correctly with useRef?');
+    return [];
+  }
+
   if (activeId && activeId in items) {
     return closestCenter({
       ...args,
