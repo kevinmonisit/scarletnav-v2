@@ -1,9 +1,6 @@
-import { createDummySchedule } from "@/lib/api/scheduleAPI";
-import { indexDB } from "@/lib/client/indexDB";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { unstable_batchedUpdates } from "react-dom";
-import { getNextContainerId } from "./utilities";
-import { useScheduleStore } from "@/lib/stores/useScheduleStore";
+import { useScheduleStore } from "@/lib/hooks/stores/useScheduleStore";
 
 export default function useScheduleHandlers() {
 

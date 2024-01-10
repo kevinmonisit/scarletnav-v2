@@ -1,9 +1,9 @@
 'use client';
 
-import { create } from 'zustand'
-import { persist, createJSONStorage, StateStorage } from 'zustand/middleware'
-import { get, set, del } from 'idb-keyval'
-import { Course, CourseByID, CoursesBySemesterID, ScheduleActions, ScheduleState, Semester, SemesterOrder } from '@/types/models'
+import { create } from 'zustand';
+import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
+import { get, set, del } from 'idb-keyval';
+import { Course, CourseByID, CoursesBySemesterID, ScheduleActions, ScheduleState, Semester, SemesterOrder } from '@/types/models';
 
 function createCourseArray() {
   return Array.from({ length: 5}, (_, i) => ({

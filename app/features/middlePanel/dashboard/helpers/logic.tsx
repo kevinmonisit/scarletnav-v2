@@ -1,5 +1,6 @@
-import { closestCenter, pointerWithin, rectIntersection, getFirstCollision, Active, DroppableContainer, CollisionDetection, UniqueIdentifier, DragOverEvent } from "@dnd-kit/core";
+import { closestCenter, pointerWithin, rectIntersection, getFirstCollision, CollisionDetection, UniqueIdentifier } from "@dnd-kit/core";
 import { Items } from "../types";
+import { TRASH_ID } from "@/lib/constants";
 
 /**
  * Custom collision detection strategy optimized for multiple containers
@@ -14,7 +15,6 @@ export const collisionDetectionStrategy = (
   activeId: UniqueIdentifier | null,
   lastOverId: React.MutableRefObject<UniqueIdentifier | null>,
   items: Items,
-  TRASH_ID: string,
   recentlyMovedToNewContainer: React.MutableRefObject<boolean> | null
 ) => {
 

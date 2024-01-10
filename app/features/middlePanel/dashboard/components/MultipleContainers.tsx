@@ -1,20 +1,12 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   CancelDrop,
-  CollisionDetection,
-  DndContext,
   DragOverlay,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
   Modifiers,
   UniqueIdentifier,
-  useSensors,
-  useSensor,
-  MeasuringStrategy,
   KeyboardCoordinateGetter,
 } from "@dnd-kit/core";
 import {
@@ -26,15 +18,13 @@ import {
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./multipleContainersKeyboardCoordinates";
 import SortableItem from "./SortableItem";
 import { getColor, dropAnimation, getIndex } from "../helpers/utilities";
-import { Items, dashboardOverviewState } from "../types";
-import { collisionDetectionStrategy as detectionStrategy } from "../helpers/logic";
-import useOverlayComponents from "../helpers/useOverlayComponents";
-import useDragHandlers from "../helpers/useDragHandlers";
+import useOverlayComponents from "../helpers/hooks/useOverlayComponents";
 import DroppableContainer from "./DroppableContainer";
-import { db } from "@/lib/client/db";
-import { useScheduleStore } from "@/lib/stores/useScheduleStore";
-import useDnDHandleStore from "@/lib/stores/useDnDHandleStore";
-import useScheduleHandlers from "../helpers/useScheduleHandlers";
+import { useScheduleStore } from "@/lib/hooks/stores/useScheduleStore";
+import useDnDAuxiliaryStore from "@/lib/hooks/stores/useDnDAuxaliaryStore";
+import useScheduleHandlers from "../helpers/hooks/useScheduleHandlers";
+import { EMPTY, PLACEHOLDER_ID } from "@/lib/constants";
+import { CoursesBySemesterID } from "@/types/models";
 
 interface Props {
   adjustScale?: boolean;
@@ -53,7 +43,7 @@ interface Props {
   }): React.CSSProperties;
   wrapperStyle?(args: { index: number }): React.CSSProperties;
   itemCount?: number;
-  items?: Items;
+  items?: CoursesBySemesterID;
   handle?: boolean;
   renderItem?: any;
   strategy?: SortingStrategy;
@@ -63,10 +53,6 @@ interface Props {
   scrollable?: boolean;
   vertical?: boolean;
 }
-
-export const TRASH_ID = "void";
-const PLACEHOLDER_ID = "placeholder";
-const empty: UniqueIdentifier[] = [];
 
 export function MultipleContainers({
   adjustScale = false,
@@ -91,13 +77,11 @@ export function MultipleContainers({
   const semesterOrder = useScheduleStore((state) => state.semesterOrder);
   const coursesBySemesterID = useScheduleStore((state) => state.coursesBySemesterID);
 
-  const { recentlyMovedToNewContainer, activeID, setActiveID } = useDnDHandleStore((state) => {
-    const { recentlyMovedToNewContainer, activeID, setActiveID } = state;
-
+  const { recentlyMovedToNewContainer, activeID } = useDnDAuxiliaryStore((state) => {
     return {
-      recentlyMovedToNewContainer,
-      activeID,
-      setActiveID,
+      recentlyMovedToNewContainer: state.recentlyMovedToNewContainer,
+      activeID: state.activeID,
+      setActiveID: state.setActiveID,
     }
   });
 
@@ -118,7 +102,6 @@ export function MultipleContainers({
     handleAddColumn,
     handleRemove,
   } = useScheduleHandlers();
-
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -193,7 +176,7 @@ export function MultipleContainers({
               <DroppableContainer
                 id={PLACEHOLDER_ID}
                 disabled={isSortingContainer}
-                items={empty}
+                items={EMPTY}
                 onClick={handleAddColumn}
                 placeholder
               >

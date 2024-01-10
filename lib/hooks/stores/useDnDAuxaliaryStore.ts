@@ -1,16 +1,17 @@
 import { SemesterID } from '@/types/models';
-import { UniqueIdentifier } from '@dnd-kit/core';
-import { useRef } from 'react';
 import { create } from 'zustand';
 
-type DnDHandleStore = {
+type DragAndDropAuxiliaryState = {
   recentlyMovedToNewContainer: React.MutableRefObject<boolean> | null;
   activeID: SemesterID;
   setRecentlyMovedToNewContainer: (flag: React.MutableRefObject<boolean>) => void;
   setActiveID: (id: SemesterID) => void;
 };
 
-const useDnDHandleStore = create<DnDHandleStore>()((set) => ({
+/**
+ * Stores auxiliary state for the drag and drop functionality.
+ */
+const useDnDAuxiliaryStore = create<DragAndDropAuxiliaryState>()((set) => ({
   recentlyMovedToNewContainer: null,
   activeID: "",
   setRecentlyMovedToNewContainer: (flag: React.MutableRefObject<boolean>) =>
@@ -21,4 +22,4 @@ const useDnDHandleStore = create<DnDHandleStore>()((set) => ({
   },
 }));
 
-export default useDnDHandleStore;
+export default useDnDAuxiliaryStore;

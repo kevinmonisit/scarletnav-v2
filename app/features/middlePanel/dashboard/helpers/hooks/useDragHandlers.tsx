@@ -1,36 +1,39 @@
-import { DragOverEvent, UniqueIdentifier } from '@dnd-kit/core';
+import { DragOverEvent } from '@dnd-kit/core';
 import React from 'react';
-import { Items, dashboardOverviewState } from '../types';
-import { findContainer, getNextContainerId } from './utilities';
+import { findContainer, getNextContainerId } from '../utilities';
 import { arrayMove } from '@dnd-kit/sortable';
 import { unstable_batchedUpdates } from 'react-dom';
-import { indexDB } from '@/lib/client/indexDB';
-import { createDummySchedule } from '@/lib/api/scheduleAPI';
-import { db } from '@/lib/client/db';
-import { CoursesBySemesterID, SemesterID, SemesterOrder } from '@/types/models';
+import { CoursesBySemesterID, SemesterOrder } from '@/types/models';
+import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
+import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
+import { PLACEHOLDER_ID, TRASH_ID } from '@/lib/constants';
 
 export default function useDragHandlers(
-  items: Items,
-  TRASH_ID: string,
-  activeId: UniqueIdentifier | null,
-  PLACEHOLDER_ID: string,
-  recentlyMovedToNewContainer: React.MutableRefObject<boolean> | null,
-  clonedItems: Items | null,
-  containers: SemesterOrder,
-  setClonedItems: React.Dispatch<React.SetStateAction<Items | null>>,
-  setSemesterOrder: (semesters: SemesterOrder) => void,
-  setActiveId: (id: SemesterID) => void,
-  setCoursesBySemesterID: (courses: CoursesBySemesterID) => void,
+  clonedItems: CoursesBySemesterID | null,
+  setClonedItems: React.Dispatch<React.SetStateAction<CoursesBySemesterID | null>>,
 ) {
 
-  const setItemsWrapper = (items: Items) => {
+  const state = useScheduleStore();
+  const {
+    semesterOrder,
+    setSemesterOrder,
+    coursesBySemesterID,
+    setCoursesBySemesterID,
+  } = state;
+
+  const recentlyMovedToNewContainer = useDnDAuxiliaryStore((state) => state.recentlyMovedToNewContainer);
+  const activeId = useDnDAuxiliaryStore((state) => state.activeID);
+  const setActiveId = useDnDAuxiliaryStore((state) => state.setActiveID);
+
+  const items = coursesBySemesterID;
+  const containers = semesterOrder;
+
+  const setItemsWrapper = (items: CoursesBySemesterID) => {
     setCoursesBySemesterID(items);
-    db.setSemesters(items);
   }
 
   const setSemesterOrderWrapper = (containers: SemesterOrder) => {
     setSemesterOrder(containers);
-    db.setSemesterOrder(containers);
   }
 
   const handleDragOver = (event: DragOverEvent) => {

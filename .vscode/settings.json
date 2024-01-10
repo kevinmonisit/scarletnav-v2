@@ -3,6 +3,7 @@
     "clsx",
     "dexie",
     "IDBP",
-    "tailwindcss"
+    "tailwindcss",
+    "zustand"
   ]
 }

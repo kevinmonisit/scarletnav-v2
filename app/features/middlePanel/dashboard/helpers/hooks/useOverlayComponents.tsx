@@ -1,13 +1,13 @@
 import { UniqueIdentifier } from '@dnd-kit/core';
-import React, { useCallback } from 'react';
-import { Items } from '../types';
-import { Container, Item } from '../components/ui';
-import { findContainer, getIndex } from './utilities';
+import React from 'react';
+import { Container, Item } from '../../components/ui';
+import { findContainer, getIndex } from '../utilities';
+import { CoursesBySemesterID } from '@/types/models';
 
 export const COLUMNS_DEPRECATED_DO_NOT_USE = 5;
 
 export default function useOverlayComponents(
-  items: Items,
+  items: CoursesBySemesterID,
   handle: boolean,
   renderItem: () => React.ReactElement,
   getColor: (id: UniqueIdentifier) => string | undefined,

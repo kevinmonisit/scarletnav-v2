@@ -1,20 +1,14 @@
 'use client';
 
 import { MiddlePanel } from '@/app/features/middlePanel/MiddlePanel';
-import App from '@/app/features/middlePanel/dashboard/ScheduleBoard';
 import { coordinateGetter } from '@/app/features/middlePanel/dashboard/components/multipleContainersKeyboardCoordinates';
 import { collisionDetectionStrategy as detectionStrategy } from '@/app/features/middlePanel/dashboard/helpers/logic';
-import useDragHandlers from '@/app/features/middlePanel/dashboard/helpers/useDragHandlers';
-import useDnDHandleStore from '@/lib/stores/useDnDHandleStore';
-import { useScheduleStore } from '@/lib/stores/useScheduleStore';
+import useDragHandlers from '@/app/features/middlePanel/dashboard/helpers/hooks/useDragHandlers';
+import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
+import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 import { CoursesBySemesterID } from '@/types/models';
 import { CollisionDetection, DndContext, KeyboardSensor, MeasuringStrategy, MouseSensor, TouchSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-
-export const TRASH_ID = "void";
-const PLACEHOLDER_ID = "placeholder";
-const empty: UniqueIdentifier[] = [];
 
 const Page: React.FC = () => {
 
@@ -23,25 +17,18 @@ const Page: React.FC = () => {
     setRecentlyMovedToNewContainer,
     recentlyMovedToNewContainer,
     activeID,
-    setActiveID } = useDnDHandleStore((state) => {
-      const {
-        recentlyMovedToNewContainer,
-        activeID,
-        setActiveID,
-        setRecentlyMovedToNewContainer } = state;
-
-      return {
-        recentlyMovedToNewContainer,
-        setRecentlyMovedToNewContainer,
-        activeID,
-        setActiveID,
-      }
-    });
+  } = useDnDAuxiliaryStore((state) => {
+    return {
+      recentlyMovedToNewContainer: state.recentlyMovedToNewContainer,
+      setRecentlyMovedToNewContainer: state.setRecentlyMovedToNewContainer,
+      activeID: state.activeID,
+      setActiveID: state.setActiveID,
+    }
+  });
 
   const recentlyMovedToNewContainerInstance = useRef(false);
 
   useEffect(() => {
-    console.log('setting recentlyMovedToNewContainer to false');
     setRecentlyMovedToNewContainer(recentlyMovedToNewContainerInstance);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -50,10 +37,7 @@ const Page: React.FC = () => {
   const [clonedItems, setClonedItems] = useState<CoursesBySemesterID | null>(null);
 
   const {
-    semesterOrder,
     coursesBySemesterID,
-    setSemesterOrder,
-    setCoursesBySemesterID,
   } = scheduleState;
 
   const {
@@ -62,17 +46,8 @@ const Page: React.FC = () => {
     handleDragEnd,
     handleDragCancel,
   } = useDragHandlers(
-    coursesBySemesterID,
-    TRASH_ID,
-    activeID,
-    PLACEHOLDER_ID,
-    recentlyMovedToNewContainer,
     clonedItems,
-    semesterOrder,
     setClonedItems,
-    setSemesterOrder,
-    setActiveID,
-    setCoursesBySemesterID,
   );
 
   const sensors = useSensors(
@@ -89,7 +64,6 @@ const Page: React.FC = () => {
       activeID,
       lastOverId,
       coursesBySemesterID,
-      TRASH_ID,
       recentlyMovedToNewContainer
     ),
     [activeID, coursesBySemesterID, recentlyMovedToNewContainer]
