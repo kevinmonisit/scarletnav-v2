@@ -8,17 +8,14 @@ export const COLUMNS_DEPRECATED_DO_NOT_USE = 5;
 
 export default function useOverlayComponents(
   items: Items,
-  // handle: boolean,
-  // renderItem: () => React.ReactElement,
+  handle: boolean,
+  renderItem: () => React.ReactElement,
   getColor: (id: UniqueIdentifier) => string | undefined,
   getItemStyles: (args: any) => React.CSSProperties,
-  // wrapperStyle: (args: any) => React.CSSProperties,
+  wrapperStyle: (args: any) => React.CSSProperties,
 ) {
 
   const columns = COLUMNS_DEPRECATED_DO_NOT_USE;
-  const handle = false;
-  const renderItem = () => <></>;
-  const wrapperStyle = (x: any) => ({});
 
   function renderSortableItemDragOverlay(id: UniqueIdentifier) {
     return (
@@ -48,7 +45,7 @@ export default function useOverlayComponents(
     return (
       <Container
         label={`Column ${containerId}`}
-        columns={columns}
+        columns={1}
         style={{
           height: "100%",
         }}
@@ -70,7 +67,7 @@ export default function useOverlayComponents(
               isDragOverlay: false,
             })}
             color={getColor(item)}
-            wrapperStyle={wrapperStyle({ index })}
+            wrapperStyle={wrapperStyle({ index: 1 })}
             renderItem={renderItem}
           />
         ))}

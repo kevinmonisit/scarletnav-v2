@@ -15,7 +15,10 @@ const useDnDHandleStore = create<DnDHandleStore>()((set) => ({
   activeID: "",
   setRecentlyMovedToNewContainer: (flag: React.MutableRefObject<boolean>) =>
     set({ recentlyMovedToNewContainer: flag }),
-  setActiveID: (id: SemesterID) => set({ activeID: id }),
+  setActiveID: (id: SemesterID) => {
+    console.log('new active id', id);
+    set({ activeID: id })
+  },
 }));
 
 export default useDnDHandleStore;

@@ -107,8 +107,11 @@ export function MultipleContainers({
     renderSortableItemDragOverlay
   } = useOverlayComponents(
     coursesBySemesterID,
+    handle,
+    renderItem,
     getColor,
     getItemStyles,
+    wrapperStyle,
   );
 
   const {
