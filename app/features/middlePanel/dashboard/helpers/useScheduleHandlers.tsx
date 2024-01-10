@@ -11,17 +11,21 @@ export default function useScheduleHandlers() {
   const containers = useScheduleStore((state) => state.semesterOrder);
   const setSemesterOrder = useScheduleStore((state) => state.setSemesterOrder);
   const setCoursesBySemesterID = useScheduleStore((state) => state.setCoursesBySemesterID);
+  const ___TEMP___populate = useScheduleStore((state) => state.___TEMP___populate);
+  const _reset_ = useScheduleStore((state) => state.______reset______);
 
   const handleAddColumn = () => {
     // indexDB.setSchedule(createDummySchedule());
-    const newContainerId = getNextContainerId(items);
-
+    // const newContainerId = getNextContainerId(items);
+    console.log('handleAddColumn');
     unstable_batchedUpdates(() => {
-      setSemesterOrder([...containers, newContainerId]);
-      setCoursesBySemesterID({
-        ...items,
-        [newContainerId]: [],
-      });
+      _reset_();
+      ___TEMP___populate();
+      // setSemesterOrder([...containers, newContainerId]);
+      // setCoursesBySemesterID({
+      //   ...items,
+      //   [newContainerId]: [],
+      // });
     });
   }
 

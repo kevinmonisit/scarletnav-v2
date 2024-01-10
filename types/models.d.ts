@@ -35,4 +35,6 @@ export interface ScheduleActions {
   setSemesterOrder: (semOrder: SemesterOrder) => void;
   setCoursesBySemesterID: (semesters: CoursesBySemesterID) => void;
   setCourses: (courses: CourseByID) => void;
+  ___TEMP___populate: () => void;
+  ______reset______(): void;
 }

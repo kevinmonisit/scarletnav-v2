@@ -9,7 +9,6 @@ function createCourseArray() {
     name: `Course ${i}`,
     credits: 3,
   }));
-
 }
 
 const NUM_SEMESTERS = 3;
