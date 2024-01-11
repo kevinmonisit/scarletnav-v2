@@ -9,6 +9,7 @@ import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 import { CoursesBySemesterID } from '@/types/models';
 import { CollisionDetection, DndContext, KeyboardSensor, MeasuringStrategy, MouseSensor, TouchSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import LeftPanel from '@/app/features/leftPanel/LeftPanel';
 
 const Page: React.FC = () => {
 
@@ -89,8 +90,9 @@ const Page: React.FC = () => {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div>
-        <h1>Dashboard Page Test</h1>
+      <h1>Dashboard Page Test</h1>
+      <div className="bg-gray-100 w-full h-screen flex flex-row">
+        <LeftPanel />
         <MiddlePanel />
       </div>
     </DndContext>

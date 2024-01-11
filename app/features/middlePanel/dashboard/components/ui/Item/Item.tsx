@@ -78,21 +78,7 @@ export const Item = React.memo(
         };
       }, [dragOverlay]);
 
-      return renderItem ? (
-        renderItem({
-          dragOverlay: Boolean(dragOverlay),
-          dragging: Boolean(dragging),
-          sorting: Boolean(sorting),
-          index,
-          fadeIn: Boolean(fadeIn),
-          listeners,
-          ref,
-          style,
-          transform,
-          transition,
-          value
-        })
-      ) : (
+      return (
         <li
           className={classNames(
             styles.Wrapper,

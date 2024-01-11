@@ -1,6 +1,7 @@
+import { COURSE_CREATION_CONTAINER_ID, COURSE_CREATION_COURSE_ID } from "@/app/features/leftPanel/courseCreation/CourseCreation";
+import { CoursesBySemesterID } from "@/types/models";
 import { DropAnimation, UniqueIdentifier, defaultDropAnimationSideEffects } from "@dnd-kit/core";
 import { AnimateLayoutChanges, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
-import { Items } from "../types";
 
 const defaultInitializer = (index: number) => index;
 
@@ -41,9 +42,13 @@ export const animateLayoutChanges: AnimateLayoutChanges = (args) =>
 
 
 export const findContainer = (
-  items: Items,
+  items: CoursesBySemesterID,
   id: UniqueIdentifier
 ) => {
+  if (id === COURSE_CREATION_COURSE_ID) {
+    return COURSE_CREATION_CONTAINER_ID;
+  }
+
   if (id in items) {
     return id;
   }
@@ -52,10 +57,14 @@ export const findContainer = (
 };
 
 export const getIndex = (
-  items: Items,
+  items: CoursesBySemesterID,
   id: UniqueIdentifier
 ) => {
   const container = findContainer(items, id);
+
+  if (container === COURSE_CREATION_CONTAINER_ID) {
+    return 0;
+  }
 
   if (!container) {
     return -1;
@@ -67,7 +76,7 @@ export const getIndex = (
 }
 
 export const getNextContainerId = (
-  items: Items
+  items: CoursesBySemesterID
 ) => {
   const containerIds = Object.keys(items);
   const lastContainerId = containerIds[containerIds.length - 1];

@@ -7,6 +7,7 @@ import { CoursesBySemesterID, SemesterOrder } from '@/types/models';
 import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
 import { PLACEHOLDER_ID, TRASH_ID } from '@/lib/constants';
+import { COURSE_CREATION_CONTAINER_ID } from '@/app/features/leftPanel/courseCreation/CourseCreation';
 
 export default function useDragHandlers(
   clonedItems: CoursesBySemesterID | null,
@@ -37,8 +38,12 @@ export default function useDragHandlers(
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    console.log('drag over');
     const { active, over } = event;
+
+    console.log('active: ', active);
+    console.log('over: ', over);
+    console.log('ITEMS: ', items);
+
     const overId = over?.id;
 
     if (overId == null || overId === TRASH_ID || active.id in items) {
@@ -48,19 +53,30 @@ export default function useDragHandlers(
     const overContainer = findContainer(items, overId);
     const activeContainer = findContainer(items, active.id);
 
+    console.log('overContainer: ', overContainer);
+    console.log('activeContainer: ', activeContainer);
+
     if (!overContainer || !activeContainer) {
       return;
     }
 
+    const items_copy = { ...items };
+    const moving_new_course_to_board = activeContainer === COURSE_CREATION_CONTAINER_ID
+      && overContainer !== COURSE_CREATION_CONTAINER_ID;
+
+    if (moving_new_course_to_board) {
+      items_copy[activeContainer] = [active.id + 'a'];
+    }
+
     if (activeContainer !== overContainer) {
-      const activeItems = items[activeContainer];
-      const overItems = items[overContainer];
+      const activeItems = items_copy[activeContainer];
+      const overItems = items_copy[overContainer];
       const overIndex = overItems.indexOf(overId);
       const activeIndex = activeItems.indexOf(active.id);
 
       let newIndex: number;
 
-      if (overId in items) {
+      if (overId in items_copy) {
         newIndex = overItems.length + 1;
       } else {
         const isBelowOverItem =
@@ -82,17 +98,35 @@ export default function useDragHandlers(
 
       recentlyMovedToNewContainer.current = true;
 
+      if (moving_new_course_to_board) {
+        setItemsWrapper({
+          ...items_copy,
+          [activeContainer]: items_copy[activeContainer].filter(
+            (item) => item !== active.id
+          ),
+          [overContainer]: [
+            ...items_copy[overContainer].slice(0, newIndex),
+            items_copy[activeContainer][activeIndex],
+            ...items_copy[overContainer].slice(
+              newIndex,
+              items_copy[overContainer].length
+            ),
+          ],
+        });
+        return;
+      }
+
       setItemsWrapper({
-        ...items,
-        [activeContainer]: items[activeContainer].filter(
+        ...items_copy,
+        [activeContainer]: items_copy[activeContainer].filter(
           (item) => item !== active.id
         ),
         [overContainer]: [
-          ...items[overContainer].slice(0, newIndex),
-          items[activeContainer][activeIndex],
-          ...items[overContainer].slice(
+          ...items_copy[overContainer].slice(0, newIndex),
+          items_copy[activeContainer][activeIndex],
+          ...items_copy[overContainer].slice(
             newIndex,
-            items[overContainer].length
+            items_copy[overContainer].length
           ),
         ],
       });

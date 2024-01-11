@@ -152,6 +152,7 @@ export function ScheduleBoard({
               >
                 <SortableContext items={coursesBySemesterID[containerId]} strategy={strategy}>
                   {coursesBySemesterID[containerId].map((value, index) => {
+
                     return (
                       <SortableItem
                         disabled={isSortingContainer}
