@@ -50,9 +50,15 @@ const Page: React.FC = () => {
     setClonedItems,
   );
 
+  const sensorOptions = {
+    activationConstraint: {
+      distance: 5,
+    },
+  }
+
   const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
+    useSensor(MouseSensor, sensorOptions),
+    useSensor(TouchSensor, sensorOptions),
     useSensor(KeyboardSensor, {
       coordinateGetter,
     })

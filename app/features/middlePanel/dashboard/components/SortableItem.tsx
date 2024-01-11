@@ -3,6 +3,7 @@ import { UniqueIdentifier } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { Item } from "./ui";
 import { getColor } from "../helpers/utilities";
+import useScheduleHandlers from "../helpers/hooks/useScheduleHandlers";
 
 interface SortableItemProps {
   containerId: UniqueIdentifier;
@@ -42,11 +43,15 @@ export default function SortableItem({
   });
   const mounted = useMountStatus();
   const mountedWhileDragging = isDragging && !mounted;
+  const { handleRemoveCourse } = useScheduleHandlers();
 
   return (
     <Item
       ref={disabled ? undefined : setNodeRef}
       value={id}
+      onRemove={() => {
+        handleRemoveCourse(id, containerId);
+      }}
       dragging={isDragging}
       sorting={isSorting}
       handle={handle}

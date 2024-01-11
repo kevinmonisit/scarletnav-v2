@@ -5,49 +5,6 @@ import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { get, set, del } from 'idb-keyval';
 import { Course, CourseByID, CoursesBySemesterID, ScheduleActions, ScheduleState, Semester, SemesterOrder } from '@/types/models';
 
-function createCourseArray() {
-  return Array.from({ length: 5}, (_, i) => ({
-    id: Math.random().toString(36).substring(7),
-    name: `Course ${i}`,
-    credits: 3,
-  }));
-}
-
-const NUM_SEMESTERS = 3;
-
-const allCourses: Course[][] = Array.from({ length: NUM_SEMESTERS}, (_, i) => createCourseArray());
-const semesterArray: Semester[] = Array.from({ length: NUM_SEMESTERS}, (_, i) => ({
-  id: `semester${i}`,
-  courses: allCourses[i].map(course => course.id),
-}));
-
-const semesterOrder = semesterArray.map(semester => semester.id);
-
-export const createDummySchedule = (): ScheduleState => {
-  const courses: CourseByID = {};
-
-  allCourses.forEach(semester => {
-    semester.forEach(course => {
-      courses[course.id] = course;
-    });
-  });
-
-  const coursesBySemesterID: CoursesBySemesterID = {};
-  const semesterByID: Record<string, Semester> = {};
-
-  semesterArray.forEach(semester => {
-    coursesBySemesterID[semester.id] = semester.courses;
-    semesterByID[semester.id] = semester;
-  });
-
-  return {
-    semesterOrder,
-    coursesBySemesterID,
-    courses,
-    semesterByID,
-  };
-}
-
 const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     console.log(name, 'has been retrieved')
@@ -102,3 +59,46 @@ export const useScheduleStore = create<ScheduleActions & ScheduleState>()(
     },
   ),
 );
+
+function createCourseArray() {
+  return Array.from({ length: 5}, (_, i) => ({
+    id: Math.random().toString(36).substring(7),
+    name: `Course ${i}`,
+    credits: 3,
+  }));
+}
+
+const NUM_SEMESTERS = 3;
+
+const allCourses: Course[][] = Array.from({ length: NUM_SEMESTERS}, (_, i) => createCourseArray());
+const semesterArray: Semester[] = Array.from({ length: NUM_SEMESTERS}, (_, i) => ({
+  id: `semester${i}`,
+  courses: allCourses[i].map(course => course.id),
+}));
+
+const semesterOrder = semesterArray.map(semester => semester.id);
+
+export const createDummySchedule = (): ScheduleState => {
+  const courses: CourseByID = {};
+
+  allCourses.forEach(semester => {
+    semester.forEach(course => {
+      courses[course.id] = course;
+    });
+  });
+
+  const coursesBySemesterID: CoursesBySemesterID = {};
+  const semesterByID: Record<string, Semester> = {};
+
+  semesterArray.forEach(semester => {
+    coursesBySemesterID[semester.id] = semester.courses;
+    semesterByID[semester.id] = semester;
+  });
+
+  return {
+    semesterOrder,
+    coursesBySemesterID,
+    courses,
+    semesterByID,
+  };
+}

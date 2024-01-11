@@ -32,8 +32,22 @@ export default function useScheduleHandlers() {
     setSemesterOrder(containers.filter((id) => id !== containerID));
   }
 
+  const handleRemoveCourse = (
+    courseID: UniqueIdentifier,
+    containerID: UniqueIdentifier,
+  ) => {
+    console.log('handleRemoveCourse');
+    const newItems = {
+      ...items,
+      [containerID]: items[containerID].filter((id) => id !== courseID),
+    };
+
+    setCoursesBySemesterID(newItems);
+  }
+
   return {
     handleRemove,
+    handleRemoveCourse,
     handleAddColumn,
   }
 }

@@ -185,6 +185,7 @@ export default function useDragHandlers(
   }
 
   const handleDragStart = (event: DragOverEvent) => {
+    console.log('test');
     const { active } = event;
     setActiveId(active.id);
     setClonedItems(items);
