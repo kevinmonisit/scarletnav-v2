@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./components/multipleContainersKeyboardCoordinates";
 import SortableItem from "./components/SortableItem";
-import { getColor, dropAnimation, getIndex } from "./helpers/utilities";
+import { getColor, dropAnimation } from "./helpers/utilities";
 import useOverlayComponents from "./helpers/hooks/useOverlayComponents";
 import DroppableContainer from "./components/DroppableContainer";
 import { useScheduleStore } from "@/lib/hooks/stores/useScheduleStore";
@@ -165,7 +165,7 @@ export function ScheduleBoard({
                         renderItem={renderItem}
                         containerId={containerId}
                         getIndex={(id) => {
-                          return getIndex(coursesBySemesterID, id);
+                          return 0;
                         }}
                       />
                     );

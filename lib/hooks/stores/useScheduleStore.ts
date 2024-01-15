@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { get, set, del } from 'idb-keyval';
 import { Course, CourseByID, CoursesBySemesterID, ScheduleActions, ScheduleState, Semester, SemesterOrder } from '@/types/models';
+import { COURSE_CREATION_CONTAINER_ID, COURSE_CREATION_COURSE_ID } from '@/app/features/leftPanel/courseCreation/CourseCreation';
 
 const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
@@ -27,14 +28,9 @@ export const useScheduleStore = create<ScheduleActions & ScheduleState>()(
       coursesBySemesterID: {},
       semesterByID: {},
       courses: {},
-      setSemesterOrder: (semOrder: SemesterOrder) => {
-        //todo: when a semester is deleted, remove it from
-        //the general semester map
-
-        set({
-          "semesterOrder": semOrder
-        })
-      },
+      setSemesterOrder: (semOrder: SemesterOrder) => set({
+        "semesterOrder": semOrder
+      }),
       setCoursesBySemesterID: (semesters: CoursesBySemesterID) => set({
         "coursesBySemesterID": semesters
       }),
@@ -94,6 +90,8 @@ export const createDummySchedule = (): ScheduleState => {
     coursesBySemesterID[semester.id] = semester.courses;
     semesterByID[semester.id] = semester;
   });
+
+  coursesBySemesterID[COURSE_CREATION_CONTAINER_ID] = [COURSE_CREATION_COURSE_ID];
 
   return {
     semesterOrder,

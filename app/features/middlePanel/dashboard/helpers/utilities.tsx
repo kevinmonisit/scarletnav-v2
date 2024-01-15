@@ -45,15 +45,13 @@ export const findContainer = (
   items: CoursesBySemesterID,
   id: UniqueIdentifier
 ) => {
-  if (id === COURSE_CREATION_COURSE_ID) {
-    return COURSE_CREATION_CONTAINER_ID;
-  }
 
   if (id in items) {
     return id;
   }
 
-  return Object.keys(items).find((key) => items[key].includes(id));
+  const container = Object.keys(items).find((key) => items[key].includes(id));
+  return container;
 };
 
 export const getIndex = (

@@ -38,12 +38,8 @@ export default function useDragHandlers(
   }
 
   const handleDragOver = (event: DragOverEvent) => {
+    console.log('HANDLEDRAGOVER IS CALLED!');
     const { active, over } = event;
-
-    console.log('active: ', active);
-    console.log('over: ', over);
-    console.log('ITEMS: ', items);
-
     const overId = over?.id;
 
     if (overId == null || overId === TRASH_ID || active.id in items) {
@@ -53,30 +49,28 @@ export default function useDragHandlers(
     const overContainer = findContainer(items, overId);
     const activeContainer = findContainer(items, active.id);
 
-    console.log('overContainer: ', overContainer);
-    console.log('activeContainer: ', activeContainer);
-
     if (!overContainer || !activeContainer) {
       return;
     }
 
-    const items_copy = { ...items };
-    const moving_new_course_to_board = activeContainer === COURSE_CREATION_CONTAINER_ID
-      && overContainer !== COURSE_CREATION_CONTAINER_ID;
-
-    if (moving_new_course_to_board) {
-      items_copy[activeContainer] = [active.id + 'a'];
-    }
-
     if (activeContainer !== overContainer) {
-      const activeItems = items_copy[activeContainer];
-      const overItems = items_copy[overContainer];
+      console.log('DRAGGING FROM ANOTHER CONTAINER');
+      const activeItems = items[activeContainer];
+      const overItems = items[overContainer];
       const overIndex = overItems.indexOf(overId);
       const activeIndex = activeItems.indexOf(active.id);
 
+      //print the variables
+      console.log('activeContainer: ' + activeContainer);
+      console.log('overContainer: ' + overContainer);
+      console.log('activeItems: ' + activeItems);
+      console.log('overItems: ' + overItems);
+      console.log('overIndex: ' + overIndex);
+      console.log('activeIndex: ' + activeIndex);
+
       let newIndex: number;
 
-      if (overId in items_copy) {
+      if (overId in items) {
         newIndex = overItems.length + 1;
       } else {
         const isBelowOverItem =
@@ -97,40 +91,20 @@ export default function useDragHandlers(
       }
 
       recentlyMovedToNewContainer.current = true;
-
-      if (moving_new_course_to_board) {
-        setItemsWrapper({
-          ...items_copy,
-          [activeContainer]: items_copy[activeContainer].filter(
-            (item) => item !== active.id
-          ),
-          [overContainer]: [
-            ...items_copy[overContainer].slice(0, newIndex),
-            items_copy[activeContainer][activeIndex],
-            ...items_copy[overContainer].slice(
-              newIndex,
-              items_copy[overContainer].length
-            ),
-          ],
-        });
-        return;
-      }
-
       setItemsWrapper({
-        ...items_copy,
-        [activeContainer]: items_copy[activeContainer].filter(
+        ...items,
+        [activeContainer]: items[activeContainer].filter(
           (item) => item !== active.id
         ),
         [overContainer]: [
-          ...items_copy[overContainer].slice(0, newIndex),
-          items_copy[activeContainer][activeIndex],
-          ...items_copy[overContainer].slice(
+          ...items[overContainer].slice(0, newIndex),
+          items[activeContainer][activeIndex],
+          ...items[overContainer].slice(
             newIndex,
-            items_copy[overContainer].length
+            items[overContainer].length
           ),
         ],
       });
-
     }
   }
 
