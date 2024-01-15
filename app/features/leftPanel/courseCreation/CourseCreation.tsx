@@ -22,8 +22,8 @@ export default function CourseCreation() {
         {coursesBySemesterID[COURSE_CREATION_CONTAINER_ID].map((value, index) => {
           return (<SortableItem
             containerId={COURSE_CREATION_CONTAINER_ID}
-            key={COURSE_CREATION_COURSE_ID}
-            id={COURSE_CREATION_COURSE_ID}
+            key={value}
+            id={value}
             index={0}
             handle={false}
             renderItem={() => <div>1</div>}

@@ -8,6 +8,7 @@ import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
 import { PLACEHOLDER_ID, TRASH_ID } from '@/lib/constants';
 import { COURSE_CREATION_CONTAINER_ID } from '@/app/features/leftPanel/courseCreation/CourseCreation';
+import crypto from 'crypto';
 
 export default function useDragHandlers(
   clonedItems: CoursesBySemesterID | null,
@@ -38,7 +39,6 @@ export default function useDragHandlers(
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    console.log('HANDLEDRAGOVER IS CALLED!');
     const { active, over } = event;
     const overId = over?.id;
 
@@ -54,19 +54,10 @@ export default function useDragHandlers(
     }
 
     if (activeContainer !== overContainer) {
-      console.log('DRAGGING FROM ANOTHER CONTAINER');
       const activeItems = items[activeContainer];
       const overItems = items[overContainer];
       const overIndex = overItems.indexOf(overId);
       const activeIndex = activeItems.indexOf(active.id);
-
-      //print the variables
-      console.log('activeContainer: ' + activeContainer);
-      console.log('overContainer: ' + overContainer);
-      console.log('activeItems: ' + activeItems);
-      console.log('overItems: ' + overItems);
-      console.log('overIndex: ' + overIndex);
-      console.log('activeIndex: ' + activeIndex);
 
       let newIndex: number;
 
@@ -119,10 +110,7 @@ export default function useDragHandlers(
       const overIndex = containers.indexOf(over.id);
 
       setSemesterOrderWrapper(arrayMove(containers, activeIndex, overIndex));
-
     }
-
-    console.log('drag end 1');
 
     const activeContainer = findContainer(items, active.id);
 
@@ -138,55 +126,58 @@ export default function useDragHandlers(
       return;
     }
 
-    console.log('drag end 2');
+    // if (overId === TRASH_ID) {
+    //   setItemsWrapper({
+    //     ...items,
+    //     [activeContainer]: items[activeContainer].filter(
+    //       (id) => id !== activeId
+    //     ),
+    //   });
+    //   setActiveId("");
+    //   return;
+    // }
 
-    if (overId === TRASH_ID) {
-      setItemsWrapper({
-        ...items,
-        [activeContainer]: items[activeContainer].filter(
-          (id) => id !== activeId
-        ),
-      });
-      setActiveId("");
-      return;
-    }
+    // if (overId === PLACEHOLDER_ID) {
+    //   const newContainerId = getNextContainerId(
+    //     items
+    //   );
 
-    if (overId === PLACEHOLDER_ID) {
-      const newContainerId = getNextContainerId(
-        items
-      );
-
-      unstable_batchedUpdates(() => {
-        setSemesterOrderWrapper([...containers, newContainerId]);
-        setItemsWrapper({
-          ...items,
-          [activeContainer]: items[activeContainer].filter(
-            (id) => id !== activeId
-          ),
-          [newContainerId]: [active.id],
-        });
-        setActiveId("");
-      });
-      return;
-    }
-
-    console.log('drag end 3');
+    //   unstable_batchedUpdates(() => {
+    //     setSemesterOrderWrapper([...containers, newContainerId]);
+    //     setItemsWrapper({
+    //       ...items,
+    //       [activeContainer]: items[activeContainer].filter(
+    //         (id) => id !== activeId
+    //       ),
+    //       [newContainerId]: [active.id],
+    //     });
+    //     setActiveId("");
+    //   });
+    //   return;
+    // }
 
     const overContainer = findContainer(items, overId);
 
     if (overContainer) {
       const activeIndex = items[activeContainer].indexOf(active.id);
       const overIndex = items[overContainer].indexOf(overId);
+      const newItemState = {
+        ...items,
+        [overContainer]: arrayMove(
+          items[overContainer],
+          activeIndex,
+          overIndex
+        ),
+      }
+
+      //course creation container is empty, so replenish it
+      const newCourseAdded = items[COURSE_CREATION_CONTAINER_ID].length == 0;
+      if (newCourseAdded) {
+        newItemState[COURSE_CREATION_CONTAINER_ID] = [Math.random().toString(36).substring(7)];
+      }
 
       if (activeIndex !== overIndex) {
-        setItemsWrapper({
-          ...items,
-          [overContainer]: arrayMove(
-            items[overContainer],
-            activeIndex,
-            overIndex
-          ),
-        });
+        setItemsWrapper(newItemState);
       }
     }
     setActiveId("");
