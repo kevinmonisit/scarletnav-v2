@@ -4,12 +4,13 @@ import { MiddlePanel } from '@/app/features/middlePanel/MiddlePanel';
 import { coordinateGetter } from '@/app/features/middlePanel/dashboard/components/multipleContainersKeyboardCoordinates';
 import { collisionDetectionStrategy as detectionStrategy } from '@/app/features/middlePanel/dashboard/helpers/logic';
 import useDragHandlers from '@/app/features/middlePanel/dashboard/helpers/hooks/useDragHandlers';
-import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
+import useAuxiliaryStore from '@/lib/hooks/stores/useAuxiliaryStore';
 import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 import { CoursesBySemesterID } from '@/types/models';
 import { CollisionDetection, DndContext, KeyboardSensor, MeasuringStrategy, MouseSensor, TouchSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import LeftPanel from '@/app/features/leftPanel/LeftPanel';
+import RightPanel from '@/app/features/rightPanel/RightPanel';
 
 const Page: React.FC = () => {
 
@@ -18,7 +19,7 @@ const Page: React.FC = () => {
     setRecentlyMovedToNewContainer,
     recentlyMovedToNewContainer,
     activeID,
-  } = useDnDAuxiliaryStore((state) => {
+  } = useAuxiliaryStore((state) => {
     return {
       recentlyMovedToNewContainer: state.recentlyMovedToNewContainer,
       setRecentlyMovedToNewContainer: state.setRecentlyMovedToNewContainer,
@@ -94,6 +95,7 @@ const Page: React.FC = () => {
       <div className="bg-gray-100 w-full h-screen flex flex-row">
         <LeftPanel />
         <MiddlePanel />
+        <RightPanel />
       </div>
     </DndContext>
   );

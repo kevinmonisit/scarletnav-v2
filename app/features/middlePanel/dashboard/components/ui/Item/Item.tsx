@@ -6,6 +6,8 @@ import type { Transform } from "@dnd-kit/utilities";
 import { Handle, Remove } from "./components";
 
 import styles from "./Item.module.scss";
+import useAuxiliaryStore from "@/lib/hooks/stores/useAuxiliaryStore";
+import { CourseID } from "@/types/models";
 
 export interface Props {
   dragOverlay?: boolean;
@@ -78,6 +80,8 @@ export const Item = React.memo(
         };
       }, [dragOverlay]);
 
+      const setCurrentInfoCourseID = useAuxiliaryStore(state => state.setCurrentInfoCourseID);
+
       return (
         <li
           className={classNames(
@@ -124,6 +128,9 @@ export const Item = React.memo(
             {...(!handle ? listeners : undefined)}
             {...props}
             tabIndex={!handle ? 0 : undefined}
+            onClick={() => {
+              if (value) setCurrentInfoCourseID(value as CourseID);
+            }}
           >
             {value}
             <span className={styles.Actions}>

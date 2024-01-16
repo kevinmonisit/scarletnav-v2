@@ -5,10 +5,9 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { unstable_batchedUpdates } from 'react-dom';
 import { CoursesBySemesterID, SemesterOrder } from '@/types/models';
 import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
-import useDnDAuxiliaryStore from '@/lib/hooks/stores/useDnDAuxaliaryStore';
+import useAuxiliaryStore from '@/lib/hooks/stores/useAuxiliaryStore';
 import { PLACEHOLDER_ID, TRASH_ID } from '@/lib/constants';
 import { COURSE_CREATION_CONTAINER_ID } from '@/app/features/leftPanel/courseCreation/CourseCreation';
-import crypto from 'crypto';
 
 export default function useDragHandlers(
   clonedItems: CoursesBySemesterID | null,
@@ -23,9 +22,9 @@ export default function useDragHandlers(
     setCoursesBySemesterID,
   } = state;
 
-  const recentlyMovedToNewContainer = useDnDAuxiliaryStore((state) => state.recentlyMovedToNewContainer);
-  const activeId = useDnDAuxiliaryStore((state) => state.activeID);
-  const setActiveId = useDnDAuxiliaryStore((state) => state.setActiveID);
+  const recentlyMovedToNewContainer = useAuxiliaryStore((state) => state.recentlyMovedToNewContainer);
+  const activeId = useAuxiliaryStore((state) => state.activeID);
+  const setActiveId = useAuxiliaryStore((state) => state.setActiveID);
 
   const items = coursesBySemesterID;
   const containers = semesterOrder;
@@ -137,24 +136,24 @@ export default function useDragHandlers(
     //   return;
     // }
 
-    // if (overId === PLACEHOLDER_ID) {
-    //   const newContainerId = getNextContainerId(
-    //     items
-    //   );
+    if (overId === PLACEHOLDER_ID) {
+      const newContainerId = getNextContainerId(
+        items
+      );
 
-    //   unstable_batchedUpdates(() => {
-    //     setSemesterOrderWrapper([...containers, newContainerId]);
-    //     setItemsWrapper({
-    //       ...items,
-    //       [activeContainer]: items[activeContainer].filter(
-    //         (id) => id !== activeId
-    //       ),
-    //       [newContainerId]: [active.id],
-    //     });
-    //     setActiveId("");
-    //   });
-    //   return;
-    // }
+      unstable_batchedUpdates(() => {
+        setSemesterOrderWrapper([...containers, newContainerId]);
+        setItemsWrapper({
+          ...items,
+          [activeContainer]: items[activeContainer].filter(
+            (id) => id !== activeId
+          ),
+          [newContainerId]: [active.id],
+        });
+        setActiveId("");
+      });
+      return;
+    }
 
     const overContainer = findContainer(items, overId);
 
@@ -168,7 +167,7 @@ export default function useDragHandlers(
           activeIndex,
           overIndex
         ),
-      }
+      };
 
       //course creation container is empty, so replenish it
       const newCourseAdded = items[COURSE_CREATION_CONTAINER_ID].length == 0;

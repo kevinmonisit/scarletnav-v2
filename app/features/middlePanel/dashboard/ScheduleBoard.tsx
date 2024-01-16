@@ -21,7 +21,7 @@ import { getColor, dropAnimation } from "./helpers/utilities";
 import useOverlayComponents from "./helpers/hooks/useOverlayComponents";
 import DroppableContainer from "./components/DroppableContainer";
 import { useScheduleStore } from "@/lib/hooks/stores/useScheduleStore";
-import useDnDAuxiliaryStore from "@/lib/hooks/stores/useDnDAuxaliaryStore";
+import useAuxiliaryStore from "@/lib/hooks/stores/useAuxiliaryStore";
 import useScheduleHandlers from "./helpers/hooks/useScheduleHandlers";
 import { EMPTY, PLACEHOLDER_ID } from "@/lib/constants";
 import { CoursesBySemesterID } from "@/types/models";
@@ -77,7 +77,7 @@ export function ScheduleBoard({
   const semesterOrder = useScheduleStore((state) => state.semesterOrder);
   const coursesBySemesterID = useScheduleStore((state) => state.coursesBySemesterID);
 
-  const { recentlyMovedToNewContainer, activeID } = useDnDAuxiliaryStore((state) => {
+  const { recentlyMovedToNewContainer, activeID } = useAuxiliaryStore((state) => {
     return {
       recentlyMovedToNewContainer: state.recentlyMovedToNewContainer,
       activeID: state.activeID,

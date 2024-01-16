@@ -1,4 +1,4 @@
-import { COURSE_CREATION_CONTAINER_ID, COURSE_CREATION_COURSE_ID } from "@/app/features/leftPanel/courseCreation/CourseCreation";
+import { COURSE_CREATION_CONTAINER_ID } from "@/app/features/leftPanel/courseCreation/CourseCreation";
 import { CoursesBySemesterID } from "@/types/models";
 import { DropAnimation, UniqueIdentifier, defaultDropAnimationSideEffects } from "@dnd-kit/core";
 import { AnimateLayoutChanges, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
