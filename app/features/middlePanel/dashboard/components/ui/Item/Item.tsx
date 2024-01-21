@@ -10,6 +10,7 @@ import useAuxiliaryStore from "@/lib/hooks/stores/useAuxiliaryStore";
 import { CourseID } from "@/types/models";
 
 export interface Props {
+  id: CourseID;
   dragOverlay?: boolean;
   color?: string;
   disabled?: boolean;
@@ -46,6 +47,7 @@ export const Item = React.memo(
   React.forwardRef<HTMLLIElement, Props>(
     (
       {
+        id,
         color,
         dragOverlay,
         dragging,
@@ -129,7 +131,7 @@ export const Item = React.memo(
             {...props}
             tabIndex={!handle ? 0 : undefined}
             onClick={() => {
-              if (value) setCurrentInfoCourseID(value as CourseID);
+              if (value) setCurrentInfoCourseID(id as CourseID);
             }}
           >
             {value}

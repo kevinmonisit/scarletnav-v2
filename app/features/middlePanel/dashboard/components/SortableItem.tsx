@@ -54,6 +54,7 @@ export default function SortableItem({
 
   return (
     <Item
+      id={id}
       ref={disabled ? undefined : setNodeRef}
       value={courseName}
       onRemove={() => {

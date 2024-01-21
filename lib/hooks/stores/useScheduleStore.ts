@@ -64,7 +64,7 @@ function createCourseArray() {
     return {
       id,
       name: `Course ${++counter}`,
-      credits: 3,
+      credits: Math.floor(Math.random() * 4) + 1,
     };
   });
 }
