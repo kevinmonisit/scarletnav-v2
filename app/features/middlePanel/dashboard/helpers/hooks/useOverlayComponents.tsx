@@ -3,6 +3,7 @@ import React from 'react';
 import { Container, Item } from '../../components/ui';
 import { findContainer, getIndex } from '../utilities';
 import { CoursesBySemesterID } from '@/types/models';
+import { useScheduleStore } from '@/lib/hooks/stores/useScheduleStore';
 
 export const COLUMNS_DEPRECATED_DO_NOT_USE = 5;
 
@@ -14,13 +15,14 @@ export default function useOverlayComponents(
   getItemStyles: (args: any) => React.CSSProperties,
   wrapperStyle: (args: any) => React.CSSProperties,
 ) {
-
-  const columns = COLUMNS_DEPRECATED_DO_NOT_USE;
+  const courses = useScheduleStore((state) => state.courses);
 
   function renderSortableItemDragOverlay(id: UniqueIdentifier) {
+    const courseName = courses[id]?.name ?? "Loading...";
     return (
       <Item
-        value={id}
+        id={id}
+        value={courseName}
         handle={handle}
         style={getItemStyles({
           containerId: findContainer(items, id) as UniqueIdentifier,
@@ -52,25 +54,29 @@ export default function useOverlayComponents(
         shadow
         unstyled={false}
       >
-        {items[containerId].map((item, index) => (
-          <Item
-            key={item}
-            value={item}
-            handle={handle}
-            style={getItemStyles({
-              containerId,
-              overIndex: -1,
-              index: getIndex(items, item),
-              value: item,
-              isDragging: false,
-              isSorting: false,
-              isDragOverlay: false,
-            })}
-            color={getColor(item)}
-            wrapperStyle={wrapperStyle({ index: 1 })}
-            renderItem={renderItem}
-          />
-        ))}
+        {items[containerId].map((id) => {
+          const courseName = courses[id]?.name ?? "Loading...";
+          return (
+            <Item
+              id={id}
+              key={id}
+              value={courseName}
+              handle={handle}
+              style={getItemStyles({
+                containerId,
+                overIndex: -1,
+                index: getIndex(items, id),
+                value: id,
+                isDragging: false,
+                isSorting: false,
+                isDragOverlay: false,
+              })}
+              color={getColor(id)}
+              wrapperStyle={wrapperStyle({ index: 1 })}
+              renderItem={renderItem}
+            />
+          )
+        })}
       </Container>
     );
   }
