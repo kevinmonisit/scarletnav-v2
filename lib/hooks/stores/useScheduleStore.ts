@@ -56,12 +56,17 @@ export const useScheduleStore = create<ScheduleActions & ScheduleState>()(
   ),
 );
 
+let counter = 0;
 function createCourseArray() {
-  return Array.from({ length: 5}, (_, i) => ({
-    id: Math.random().toString(36).substring(7),
-    name: `Course ${i}`,
-    credits: 3,
-  }));
+  return Array.from({ length: 5}, (_, i) => {
+    const id = Math.random().toString(36).substring(2, 9);
+
+    return {
+      id,
+      name: `Course ${++counter}`,
+      credits: 3,
+    };
+  });
 }
 
 const NUM_SEMESTERS = 3;

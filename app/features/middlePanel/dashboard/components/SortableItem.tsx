@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { Item } from "./ui";
 import { getColor } from "../helpers/utilities";
 import useScheduleHandlers from "../helpers/hooks/useScheduleHandlers";
+import { useScheduleStore } from "@/lib/hooks/stores/useScheduleStore";
 
 interface SortableItemProps {
   containerId: UniqueIdentifier;
@@ -45,10 +46,16 @@ export default function SortableItem({
   const mountedWhileDragging = isDragging && !mounted;
   const { handleRemoveCourse } = useScheduleHandlers();
 
+  const courseName = useScheduleStore((state) => {
+    if (!state.courses[id]) return "Loading...";
+
+    return state.courses[id].name;
+  });
+
   return (
     <Item
       ref={disabled ? undefined : setNodeRef}
-      value={id}
+      value={courseName}
       onRemove={() => {
         handleRemoveCourse(id, containerId);
       }}
